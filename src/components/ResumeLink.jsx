@@ -15,8 +15,9 @@ import { rpx } from '../constants/responsive.js'
  * same as before; the needsFill background only shows up when NOT
  * hovered, so the hover state always reads the same everywhere.
  *
- * TODO: point this at the real resume file/URL once it exists, and open it
- * in a new tab (e.g. target="_blank" rel="noopener").
+ * Points at the real resume PDF (public/Resume.pdf — served from the site
+ * root as /Resume.pdf), opened in a new tab so clicking it never navigates
+ * away from the site itself.
  */
 export default function ResumeLink({ active }) {
   const [hovered, setHovered] = useState(false)
@@ -24,14 +25,13 @@ export default function ResumeLink({ active }) {
 
   return (
     <motion.a
-      href="#"
+      href="/Resume.pdf"
+      target="_blank"
+      rel="noopener noreferrer"
       data-cursor-hover="button"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      onClick={(e) => {
-        e.preventDefault()
-      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
