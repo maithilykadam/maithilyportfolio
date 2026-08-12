@@ -100,7 +100,7 @@ export default function BottomStepper({ active, sections, onSelect }) {
       transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: 'absolute',
-        bottom: rpx(40),
+        bottom: rpx(20),
         left: '50%',
         x: '-50%',
         zIndex: 10,

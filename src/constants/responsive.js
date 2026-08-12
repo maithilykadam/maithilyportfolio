@@ -20,3 +20,23 @@ export function rpx(px) {
   const vw = (px / DESIGN_WIDTH) * 100
   return px < 0 ? `max(${px}px, ${vw}vw)` : `min(${px}px, ${vw}vw)`
 }
+
+// rpx() only ever scales with viewport *width* — fine for most of the
+// site, which just needs to shrink on narrow screens. But a few spots
+// stack content vertically inside a fixed, non-scrolling 100vh panel
+// (HeroContent's name → tagline → roles list, with ResumeLink pinned to
+// the bottom of the same viewport): on a short-but-wide window those
+// vertical gaps stay full-size even though there's less height to work
+// with, and the roles list can run down into the Resume link. rvh() is
+// the same idea as rpx(), just keyed to viewport *height* instead, so
+// vertical spacing shrinks in step with how much vertical room there
+// actually is — the two elements stay relative to each other instead of
+// one just being wherever it lands. Design height of 900 (a 13" MacBook
+// Air's logical height, alongside DESIGN_WIDTH's matching 1440) is the
+// reference; anything shorter scales those gaps down proportionally.
+const DESIGN_HEIGHT = 900
+
+export function rvh(px) {
+  const vh = (px / DESIGN_HEIGHT) * 100
+  return px < 0 ? `max(${px}px, ${vh}vh)` : `min(${px}px, ${vh}vh)`
+}

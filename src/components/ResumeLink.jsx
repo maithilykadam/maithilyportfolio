@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { rpx } from '../constants/responsive.js'
+import { rpx, rvh } from '../constants/responsive.js'
 
 /**
  * Resume link — fixed to the bottom-left corner of the viewport across
@@ -37,7 +37,11 @@ export default function ResumeLink({ active }) {
       style={{
         position: 'fixed',
         left: rpx(64),
-        bottom: rpx(64),
+        // rvh (viewport-height-based), not rpx — see the note in
+        // HeroContent.jsx on the roles list this sits directly below on
+        // the home panel; both need to compress together on a short
+        // window or the roles list runs into this.
+        bottom: rvh(64),
         display: 'inline-flex',
         alignItems: 'center',
         gap: rpx(6),

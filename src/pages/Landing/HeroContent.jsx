@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { rpx } from '../../constants/responsive.js'
+import { rpx, rvh } from '../../constants/responsive.js'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -36,8 +36,10 @@ export default function HeroContent({ onWhoClick }) {
         inset: 0,
         // Top padding halved (64 → 32) vs. the other three sides, per
         // request to tighten up the empty space at the very top of the
-        // page specifically.
-        padding: `${rpx(32)} ${rpx(64)} ${rpx(64)} ${rpx(64)}`,
+        // page specifically. Top/bottom use rvh (viewport-height-based,
+        // see responsive.js) rather than rpx — see the note on the roles
+        // block below for why.
+        padding: `${rvh(32)} ${rpx(64)} ${rvh(64)} ${rpx(64)}`,
         pointerEvents: 'none',
       }}
     >
@@ -73,7 +75,7 @@ export default function HeroContent({ onWhoClick }) {
             fontWeight: 400,
             fontSize: rpx(170),
             lineHeight: rpx(135),
-            margin: `${rpx(16)} 0 0 0`,
+            margin: `${rvh(16)} 0 0 0`,
             whiteSpace: 'nowrap',
           }}
         >
@@ -95,7 +97,7 @@ export default function HeroContent({ onWhoClick }) {
             fontSize: rpx(23),
             lineHeight: 1.35,
             width: rpx(429),
-            margin: `${rpx(16)} 0 0 0`,
+            margin: `${rvh(16)} 0 0 0`,
           }}
         >
           a product designer trying to make the internet a little less
@@ -111,7 +113,7 @@ export default function HeroContent({ onWhoClick }) {
           onClick={onWhoClick}
           style={{
             width: 'fit-content',
-            margin: `${rpx(6)} 0 0 0`,
+            margin: `${rvh(6)} 0 0 0`,
             padding: 0,
             background: 'none',
             border: 'none',
@@ -130,14 +132,23 @@ export default function HeroContent({ onWhoClick }) {
           group above) rather than crowded into the same flex column, and
           kept narrow (unlike the WHO/name/tagline block, which is
           deliberately wide) so it stays inside the WHO column instead of
-          spilling into the WORK boxes the way the headline does. */}
+          spilling into the WORK boxes the way the headline does.
+          `gap`/`marginTop` use rvh (viewport-*height*-based, mirrors
+          rpx's width-based scaling — see responsive.js) instead of rpx:
+          this whole panel is a fixed, non-scrolling 100vh with
+          ResumeLink pinned to its bottom edge, so on a short window rpx
+          alone doesn't shrink these vertical gaps at all and this list
+          was running down into Resume. rvh shrinks the gaps in step with
+          the actual vertical room available, same idea as rpx does for
+          width, so the two stay relative to each other instead of
+          colliding. */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: rpx(16),
+          gap: rvh(16),
           width: rpx(220),
-          marginTop: rpx(64),
+          marginTop: rvh(64),
         }}
       >
         {ROLES.map((role) => (

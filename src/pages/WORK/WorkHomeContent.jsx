@@ -19,14 +19,19 @@ import { rpx } from '../../constants/responsive.js'
 // normal-ish ~1.3:1 shape, not the extremely wide/short first draft that
 // needed letterboxing to stay legible — cover crops only a little off
 // the edges and keeps the rest of the site's "no letterboxing" convention.
-function PlaceholderBox({ area, onClick, video }) {
+// `title` is optional — renders as a small caption below the box rather
+// than layered on top of it, so it never fights with the video/imagery
+// for legibility. The box itself becomes `flex: 1 1 auto` inside a
+// column instead of filling the whole grid cell, so the caption gets its
+// own real space rather than overlapping.
+function PlaceholderBox({ area, onClick, video, title }) {
   const [hovered, setHovered] = useState(false)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.75, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
-      style={{ gridArea: area, minWidth: 0, minHeight: 0 }}
+      style={{ gridArea: area, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: rpx(8) }}
     >
       <div
         data-cursor-hover="ring"
@@ -35,8 +40,8 @@ function PlaceholderBox({ area, onClick, video }) {
         onMouseLeave={() => setHovered(false)}
         style={{
           position: 'relative',
-          width: '100%',
-          height: '100%',
+          flex: '1 1 auto',
+          minHeight: 0,
           overflow: 'hidden',
           background: video ? '#000' : 'rgba(0, 0, 0, 0.25)',
           opacity: hovered ? 0.85 : 1,
@@ -56,6 +61,19 @@ function PlaceholderBox({ area, onClick, video }) {
           />
         )}
       </div>
+      {title && (
+        <p
+          style={{
+            margin: 0,
+            flexShrink: 0,
+            fontFamily: 'var(--font-sans)',
+            fontSize: rpx(14),
+            color: 'rgba(0, 0, 0, 0.55)',
+          }}
+        >
+          {title}
+        </p>
+      )}
     </motion.div>
   )
 }
@@ -102,9 +120,10 @@ export default function WorkHomeContent({ onNavigate }) {
         }}
       >
         {/* Sits in what was the empty top-left cell, resting on its
-            bottom edge — reads as the caption directly above the box
-            underneath it (bottomLeft), rather than floating loose in the
-            cell. */}
+            bottom edge — pulled past the grid's own row gap (20px) with a
+            negative margin so it actually hugs the box underneath
+            (bottomLeft) instead of just being the closest thing to it
+            while still sitting a full gap-width away. */}
         <motion.button
           data-cursor-hover="button"
           initial={{ opacity: 0, y: 20 }}
@@ -116,7 +135,7 @@ export default function WorkHomeContent({ onNavigate }) {
             alignSelf: 'end',
             justifySelf: 'start',
             padding: 0,
-            margin: `0 0 ${rpx(4)} 0`,
+            margin: `0 0 ${rpx(-16)} 0`,
             background: 'none',
             border: 'none',
             cursor: 'pointer',
@@ -132,9 +151,10 @@ export default function WorkHomeContent({ onNavigate }) {
           area="top"
           onClick={onNavigate}
           video={{ src: '/home/ophelia/ophelia-demo-4.mp4', poster: '/home/ophelia/ophelia-demo-4-poster.jpg' }}
+          title="Ophelia AI Interface"
         />
-        <PlaceholderBox area="bottomLeft" onClick={onNavigate} />
-        <PlaceholderBox area="bottomRight" onClick={onNavigate} />
+        <PlaceholderBox area="bottomLeft" onClick={onNavigate} title="OMHS" />
+        <PlaceholderBox area="bottomRight" onClick={onNavigate} title="Bitesize" />
       </div>
     </>
   )
