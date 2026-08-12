@@ -1,0 +1,70 @@
+import { useEffect } from 'react'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
+
+/**
+ * Custom cursor pill that follows the mouse and reads a short label (e.g.
+ * "open case study") while hovering an eligible target. Unlike the earlier
+ * version, the system cursor stays visible (the target no longer sets
+ * `cursor: 'none'`) — the pill sits offset to the bottom-right of the
+ * actual pointer instead of replacing it, so both are visible at once
+ * (matches the reference: arrow cursor + "click to view" pill trailing
+ * just below-right of it).
+ *
+ * Position is tracked globally (not scoped to any one column) since the
+ * pill needs to follow the cursor across the whole viewport, independent
+ * of which column it happens to be hovering over. A light spring gives it
+ * a small trailing delay instead of snapping exactly to the pointer, which
+ * reads as smoother/more deliberate.
+ */
+export default function CursorPill({ visible, label = 'open case study' }) {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const smoothX = useSpring(x, { stiffness: 500, damping: 45, mass: 0.4 })
+  const smoothY = useSpring(y, { stiffness: 500, damping: 45, mass: 0.4 })
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      x.set(e.clientX)
+      y.set(e.clientY)
+    }
+    window.addEventListener('mousemove', handleMove)
+    return () => window.removeEventListener('mousemove', handleMove)
+  }, [x, y])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.7 }}
+      animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.7 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        position: 'fixed',
+        top: smoothY,
+        left: smoothX,
+        // Offset down-and-right of the actual pointer tip rather than
+        // centered on it, so the system cursor stays fully visible above
+        // the pill (matches the reference screenshot).
+        transform: 'translate(90px, 110px)',
+        pointerEvents: 'none',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '8px',
+        borderRadius: '999px',
+        background: '#ffffff',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.18)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <span
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: '14px',
+          color: 'var(--color-text)',
+        }}
+      >
+        {label}
+      </span>
+    </motion.div>
+  )
+}

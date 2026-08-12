@@ -1,0 +1,49 @@
+:root {
+  --color-bg: #ebf1f6;
+  --color-border: #d5dbe1;
+  --color-text: #000000;
+  --font-serif: 'Arapey', 'Times New Roman', serif;
+  --font-sans: 'Raleway', sans-serif;
+  --font-instrument: 'Instrument Serif', serif;
+  /* Shared vertical anchor point for every collapsed, rotated column label
+     (WORK / PLAYGROUND / the collapsed name) so they always line up with
+     each other no matter which page they appear on. Tune this one value
+     to shift all of them together. */
+  --collapsed-anchor: 42%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* System cursor replaced with a custom navy dot (see
+   components/CustomCursor.jsx) — !important so it wins over the more
+   specific `button { cursor: pointer }` rule above and any per-element
+   cursor styles elsewhere. */
+* {
+  cursor: none !important;
+}

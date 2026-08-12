@@ -1,0 +1,299 @@
+import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'
+import { PREVIEW_BOX, PLAYGROUND_RAIL_WIDTH } from '../constants/layout.js'
+import { PROJECTS } from '../pages/WORK/projects.js'
+import { rpx } from '../constants/responsive.js'
+
+// How long each group sits before the gallery cross-fades to the next
+// group, while a project with `previewGroups` is hovered.
+const GALLERY_ROTATE_MS = 2600
+
+/**
+ * The case-study preview panel from Figma node 10:41 (element 10:53). It's
+ * a full-height vertical strip flush against the top and bottom edges of
+ * the viewport, and against the left edge of the collapsed PLAYGROUND rail
+ * (see PlaygroundRail.jsx) rather than the viewport's own right edge — so
+ * it reads as part of the page's architecture rather than a floating
+ * widget sitting on top of it.
+ *
+ * The panel is always visible on the home page — only the content inside
+ * it changes: "hover over a project to see a preview" when nothing's
+ * hovered, the project's own label once one of the WORK case studies is.
+ * Pass `hoveredId={null}` for the idle state.
+ *
+ * The panel itself is a "light through frosted glass" surface: one large,
+ * soft, blurred diagonal highlight (not several small colored blobs, which
+ * started reading as busy/"wallpaper") plus a highlight that follows the
+ * cursor anywhere on screen (tracked relative to the panel's own bounds).
+ * Both lean into a soft blue tint, kept low-contrast/low-opacity so it
+ * doesn't compete with the name for attention — it's meant to recede
+ * until someone hovers a case study.
+ *
+ * Once a project has real `previewGroups` (see projects.js), hovering it
+ * shows those as a small rotating gallery — a group of screens stacked
+ * full width top to bottom, fading out and back in as the next group
+ * every couple seconds, like flipping through a stack of mockups. Always
+ * a vertical stack (mobile screens and wider admin/tablet screens alike)
+ * with `object-fit: cover` so every screen fills its slot completely, no
+ * matter its source aspect ratio. Projects without groups yet just fall
+ * back to the plain label text this always showed.
+ */
+export default function ProjectPreview({ hoveredId }) {
+  const project = PROJECTS.find((p) => p.id === hoveredId) ?? null
+  const boxRef = useRef(null)
+
+  // Which group the gallery is currently showing, for whichever project
+  // is hovered. Resets to the first group and starts cycling fresh every
+  // time the hovered project changes.
+  const galleryGroups = project?.previewGroups?.length ? project.previewGroups : []
+  const [groupIndex, setGroupIndex] = useState(0)
+
+  useEffect(() => {
+    setGroupIndex(0)
+    if (galleryGroups.length < 2) return
+    const id = setInterval(() => {
+      setGroupIndex((i) => (i + 1) % galleryGroups.length)
+    }, GALLERY_ROTATE_MS)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, galleryGroups.length])
+
+  // Percent position of the cursor relative to the panel's own box —
+  // drives the highlight below. Springs give it a gentle drift instead of
+  // snapping straight to the cursor.
+  const mx = useMotionValue(50)
+  const my = useMotionValue(20)
+  const smoothX = useSpring(mx, { stiffness: 55, damping: 18, mass: 0.6 })
+  const smoothY = useSpring(my, { stiffness: 55, damping: 18, mass: 0.6 })
+  const highlight = useMotionTemplate`radial-gradient(circle at ${smoothX}% ${smoothY}%, rgba(255,255,255,0.75) 0%, rgba(210,224,255,0.35) 35%, rgba(255,255,255,0) 65%)`
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      const rect = boxRef.current?.getBoundingClientRect()
+      if (!rect || rect.width === 0) return
+      mx.set(((e.clientX - rect.left) / rect.width) * 100)
+      my.set(((e.clientY - rect.top) / rect.height) * 100)
+    }
+    window.addEventListener('mousemove', handleMove)
+    return () => window.removeEventListener('mousemove', handleMove)
+  }, [mx, my])
+
+  return (
+    <motion.div
+      ref={boxRef}
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 0.8, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: rpx(PLAYGROUND_RAIL_WIDTH),
+        width: rpx(PREVIEW_BOX.width),
+        height: '100%',
+        overflow: 'hidden',
+        background: 'rgba(232, 238, 247, 0.6)',
+        pointerEvents: 'none',
+      }}
+    >
+      {/* Frosted-glass texture: ONE large, soft, blurred diagonal
+          highlight instead of several small colored blobs — multiple
+          blobs read as busy/"wallpaper"; a single broad sweep of light
+          reads as an actual reflection off an expensive glass surface.
+          Rotated + oversized + heavily blurred so it has no hard edges
+          anywhere. */}
+      <div style={{ position: 'absolute', inset: '-30%', filter: 'blur(80px)' }}>
+        <div
+          style={{
+            position: 'absolute',
+            left: '-15%',
+            top: '8%',
+            width: '150%',
+            height: '46%',
+            borderRadius: '50%',
+            transform: 'rotate(-24deg)',
+            background: 'rgba(200,218,245,0.5)',
+          }}
+        />
+      </div>
+
+      {/* the moving "light reflecting on glass" highlight — follows the
+          cursor wherever it is on screen, relative to this box */}
+      <motion.div style={{ position: 'absolute', inset: 0, background: highlight, mixBlendMode: 'screen' }} />
+
+      {/* Content cross-fades independently of the box itself, so switching
+          which project is hovered never re-triggers the panel's own
+          fade-in — it just swaps what's inside. Idle state ("hover to
+          preview") shows until a case study is hovered. */}
+      <AnimatePresence mode="wait">
+        {project && galleryGroups.length > 0 ? (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              padding: rpx(24),
+              gap: rpx(12),
+            }}
+          >
+            {/* The gallery itself — always a vertical stack, full width,
+                whether the screens are tall mobile shots or wide
+                admin/tablet views. object-fit: cover instead of contain —
+                contain was leaving visible white letterboxing around any
+                screen whose aspect ratio didn't exactly match its slot;
+                cover fills the slot completely (cropping instead), so
+                there's never a background showing through. Hairline
+                border only, no fill color, no rounded corners/shadow —
+                matches the flat treatment everywhere else on the site.
+                Gap between screens kept to a hairline (4px). */}
+            <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={groupIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: rpx(4),
+                  }}
+                >
+                  {galleryGroups[groupIndex].map((src) => (
+                    <div
+                      key={src}
+                      style={{
+                        flex: 1,
+                        minHeight: 0,
+                        overflow: 'hidden',
+                        border: '1px solid rgba(0, 0, 0, 0.1)',
+                      }}
+                    >
+                      <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <p
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-sans)',
+                fontSize: rpx(16),
+                color: 'var(--color-text)',
+              }}
+            >
+              {project.label}
+            </p>
+          </motion.div>
+        ) : project ? (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'flex-end',
+              padding: rpx(28),
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-sans)',
+                fontSize: rpx(18),
+                color: 'var(--color-text)',
+              }}
+            >
+              {project.label}
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="idle"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              justifyContent: 'center',
+              gap: rpx(18),
+              padding: rpx(48),
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: rpx(10) }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: rpx(14),
+                  fontWeight: 600,
+                  letterSpacing: '0.16em',
+                  color: '#1e3a8a',
+                  opacity: 0.65,
+                }}
+              >
+                CURRENTLY
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: rpx(4) }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: rpx(20),
+                    color: 'rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  experience design @ ontario government
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: rpx(20),
+                    color: 'rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  engineering @ university of waterloo
+                </p>
+              </div>
+            </div>
+
+            <div style={{ width: rpx(200), height: '1px', background: 'rgba(0, 0, 0, 0.08)' }} />
+
+            <p
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-sans)',
+                fontSize: rpx(15),
+                color: 'rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              hover over a project to begin
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
