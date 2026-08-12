@@ -97,9 +97,12 @@ function PlaceholderBox({ area, onClick, video, title }) {
  * imagery goes directly into these boxes later, no separate preview
  * mechanism needed. Each box still jumps to the full WORK page on click.
  *
- * `onNavigate` — go to /work (wired to each box).
+ * `onNavigate` — go to the WORK grid (wired to the OMHS/Bitesize boxes,
+ * which don't have their own case study yet). `onNavigateToOphelia` — go
+ * straight into the Ophelia case study instead of the grid, since that
+ * one's a real project now (wired to the Ophelia box specifically).
  */
-export default function WorkHomeContent({ onNavigate }) {
+export default function WorkHomeContent({ onNavigate, onNavigateToOphelia }) {
   return (
     <>
       {/* "WORK" label removed — the top nav (now living at the top of the
@@ -149,7 +152,7 @@ export default function WorkHomeContent({ onNavigate }) {
 
         <PlaceholderBox
           area="top"
-          onClick={onNavigate}
+          onClick={onNavigateToOphelia}
           video={{ src: '/home/ophelia/ophelia-demo-4.mp4', poster: '/home/ophelia/ophelia-demo-4-poster.jpg' }}
           title="Ophelia AI Interface"
         />

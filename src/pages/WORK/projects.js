@@ -50,4 +50,10 @@ export const PROJECTS = [
     description: 'Helping students discover campus events',
     previewColor: '#cfe0d3',
   },
+  {
+    id: 'ophelia-ai-interface',
+    label: '04 // Ophelia AI Interface',
+    description: 'An infinite AI canvas for directing image and video generation',
+    previewColor: '#e8d4c9',
+  },
 ]

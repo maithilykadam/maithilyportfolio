@@ -185,6 +185,18 @@ export default function Shell({ active }) {
     else navigate(path)
   }
 
+  // Same idea as goTo, but for landing directly on one specific case
+  // study instead of the WORK grid — passes the project id through
+  // router state (read by WorkContent.jsx via useLocation) rather than a
+  // dedicated per-project route/URL, since these aren't real standalone
+  // pages yet. Used by the home page's video box (see WorkHomeContent
+  // usage below) so clicking Ophelia opens straight into that case study
+  // instead of dropping onto the grid first.
+  const goToProject = (projectId) => (e) => {
+    e.stopPropagation()
+    navigate('/work', { state: { openId: projectId } })
+  }
+
   return (
     <div
       style={{
@@ -235,7 +247,7 @@ export default function Shell({ active }) {
                   width: `calc(100vw - ${rpx(HOME_WORK_OFFSET)})`,
                 }}
               >
-                <WorkHomeContent onNavigate={goTo('/work')} />
+                <WorkHomeContent onNavigate={goTo('/work')} onNavigateToOphelia={goToProject('ophelia-ai-interface')} />
               </div>
 
               {/* Collapsed PLAYGROUND rail — home page only, per the "keep
