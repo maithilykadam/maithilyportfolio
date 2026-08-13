@@ -263,8 +263,8 @@ export default function OpheliaCaseStudy({ onBack }) {
               }}
             >
               <video
-                src="/home/ophelia/ophelia-demo-4.mp4"
-                poster="/home/ophelia/ophelia-demo-4-poster.jpg"
+                src="/home/ophelia/ophelia-demo-5.mp4"
+                poster="/home/ophelia/ophelia-demo-5-poster.jpg"
                 autoPlay
                 loop
                 muted
@@ -309,9 +309,23 @@ export default function OpheliaCaseStudy({ onBack }) {
           >
             Solution
           </h2>
+          {/* Small note — the full write-up isn't ready yet, but the real
+              finished screens are, so they're shown here in the meantime
+              rather than waiting on the rest of the case study. */}
+          <p
+            style={{
+              margin: `${rpx(12)} 0 0 0`,
+              fontFamily: 'var(--font-sans)',
+              fontStyle: 'italic',
+              fontSize: rpx(14),
+              color: 'rgba(0, 0, 0, 0.45)',
+            }}
+          >
+            Full case study coming soon — in the meantime, here are the finished screens.
+          </p>
           <div
             style={{
-              marginTop: rpx(20),
+              marginTop: rpx(24),
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
               gap: rpx(28),

@@ -67,7 +67,7 @@ function PlaceholderBox({ area, onClick, video, title }) {
             margin: 0,
             flexShrink: 0,
             fontFamily: 'var(--font-sans)',
-            fontSize: rpx(14),
+            fontSize: rpx(17),
             color: 'rgba(0, 0, 0, 0.55)',
           }}
         >
@@ -153,11 +153,16 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia }) {
         <PlaceholderBox
           area="top"
           onClick={onNavigateToOphelia}
-          video={{ src: '/home/ophelia/ophelia-demo-4.mp4', poster: '/home/ophelia/ophelia-demo-4-poster.jpg' }}
+          video={{ src: '/home/ophelia/ophelia-demo-5.mp4', poster: '/home/ophelia/ophelia-demo-5-poster.jpg' }}
           title="Ophelia AI Interface"
         />
         <PlaceholderBox area="bottomLeft" onClick={onNavigate} title="OMHS" />
-        <PlaceholderBox area="bottomRight" onClick={onNavigate} title="Bitesize" />
+        <PlaceholderBox
+          area="bottomRight"
+          onClick={onNavigate}
+          video={{ src: '/home/bitesize/bitesize-demo.mp4', poster: '/home/bitesize/bitesize-demo-poster.jpg' }}
+          title="Bitesize"
+        />
       </div>
     </>
   )
