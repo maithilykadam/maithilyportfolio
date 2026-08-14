@@ -263,8 +263,8 @@ export default function OpheliaCaseStudy({ onBack }) {
               }}
             >
               <video
-                src="/home/ophelia/ophelia-demo-5.mp4"
-                poster="/home/ophelia/ophelia-demo-5-poster.jpg"
+                src="/home/ophelia/ophelia-demo-6.mp4"
+                poster="/home/ophelia/ophelia-demo-6-poster.jpg"
                 autoPlay
                 loop
                 muted

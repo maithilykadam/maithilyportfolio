@@ -153,7 +153,7 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia }) {
         <PlaceholderBox
           area="top"
           onClick={onNavigateToOphelia}
-          video={{ src: '/home/ophelia/ophelia-demo-5.mp4', poster: '/home/ophelia/ophelia-demo-5-poster.jpg' }}
+          video={{ src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' }}
           title="Ophelia AI Interface"
         />
         <PlaceholderBox area="bottomLeft" onClick={onNavigate} title="OMHS" />
