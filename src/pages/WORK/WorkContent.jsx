@@ -18,11 +18,32 @@ const WORK_GRID_IDS = [
   'serviceontario-integration',
   'orbit-mobile-design',
 ]
+// Real projects that don't have a written-up case study yet — their boxes
+// stay in the grid (so the layout doesn't shift once they're ready) but
+// read as inactive and not clickable (see `comingSoon` on PreviewBox
+// below). Each gets its own small playful line instead of a flat "coming
+// soon" repeated twice — Orbit gets a space pun off its own name, a nice
+// bit of "in on the joke" personality rather than a generic placeholder.
+const COMING_SOON_LINES = {
+  'serviceontario-integration': 'Still cutting through the red tape ✂️',
+  'orbit-mobile-design': 'Still in orbit — hasn’t landed yet 🚀',
+}
+
 const SLOTS = WORK_GRID_IDS.map((id, i) => {
   const project = PROJECTS.find((p) => p.id === id)
   return project
-    ? { id: project.id, title: project.label.replace(/^\d+\s*\/\/\s*/, ''), description: project.description }
-    : { id: `placeholder-${i}`, title: 'Coming Soon', description: null }
+    ? {
+        id: project.id,
+        title: project.label.replace(/^\d+\s*\/\/\s*/, ''),
+        description: project.description,
+        // Each project's own accent color (see projects.js) doubles as
+        // the comingSoon fill — keeps the box feeling like "this project,
+        // not ready yet" rather than a generic gray placeholder.
+        previewColor: project.previewColor,
+        comingSoonLine: COMING_SOON_LINES[project.id],
+        comingSoon: Boolean(COMING_SOON_LINES[project.id]),
+      }
+    : { id: `placeholder-${i}`, title: 'Coming Soon', description: null, comingSoon: true }
 })
 
 // Same screen-recording previews as the home page boxes (see
@@ -43,6 +64,10 @@ function chunkIntoColumns(items, columns) {
   return cols
 }
 
+// Split once at module level (rather than inline in the render) since both
+// halves of the left/right layout below need to reach into it separately.
+const [LEFT_COLUMN, RIGHT_COLUMN] = chunkIntoColumns(SLOTS, 2)
+
 // A two-column masonry list — each card a fixed-aspect image/video with a
 // caption row underneath, instead of the old fixed-height bento grid. Sized
 // to its own natural content height (not stretched/shrunk to fill the
@@ -61,19 +86,27 @@ function chunkIntoColumns(items, columns) {
 // Caption is a plain stacked title/one-liner (not the old two-column
 // pull-quote/small-caps masthead layout) — the project name up top at
 // normal weight, its description underneath in a smaller, lighter line.
+//
+// `comingSoon` boxes are deliberately inert — no onClick, no pointer
+// cursor, no case-study cursor ring — but styled to feel like a cute
+// placeholder rather than a dead gray box: the project's own accent color
+// (see projects.js) as the fill, a bigger serif "Coming Soon" (matches the
+// site's other personal-voice headings), and a small playful line
+// underneath instead of just repeating "coming soon" a second time.
 function PreviewBox({ slot, onOpen }) {
   const video = VIDEO_BY_ID[slot.id]
+  const disabled = slot.comingSoon
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: rpx(12), width: '94%' }}>
       <div
-        data-cursor-hover="ring"
-        onClick={() => onOpen(slot.id)}
+        data-cursor-hover={disabled ? undefined : 'ring'}
+        onClick={disabled ? undefined : () => onOpen(slot.id)}
         style={{
           position: 'relative',
           aspectRatio: '4 / 3',
-          cursor: 'pointer',
+          cursor: disabled ? 'default' : 'pointer',
           overflow: 'hidden',
-          background: video ? '#000' : 'rgba(0, 0, 0, 0.25)',
+          background: video ? '#000' : disabled ? slot.previewColor ?? '#e8e2d8' : 'rgba(0, 0, 0, 0.25)',
         }}
       >
         {video && (
@@ -87,8 +120,47 @@ function PreviewBox({ slot, onOpen }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         )}
+        {disabled && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: rpx(10),
+              padding: `0 ${rpx(32)}`,
+              textAlign: 'center',
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-serif)',
+                fontWeight: 400,
+                fontSize: rpx(30),
+                color: 'rgba(0, 0, 0, 0.55)',
+              }}
+            >
+              Coming Soon
+            </p>
+            {slot.comingSoonLine && (
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: rpx(17),
+                  color: 'rgba(0, 0, 0, 0.45)',
+                }}
+              >
+                {slot.comingSoonLine}
+              </p>
+            )}
+          </div>
+        )}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: rpx(4) }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: rpx(4), opacity: disabled ? 0.5 : 1 }}>
         <p
           style={{
             margin: 0,
@@ -249,31 +321,40 @@ export default function WorkContent() {
           </motion.div>
         ) : (
           <motion.div key="grid" style={{ flexShrink: 0 }}>
-            {/* Small personal-voice tagline under the WORK label — just a
-                friendly one-liner, not a real caption/instruction, so it's
-                sized and styled well below the grid content itself (italic,
-                muted, no serif pull-quote weight) rather than competing
-                with it. */}
-            <p
-              style={{
-                margin: `0 0 ${rpx(32)} 0`,
-                fontFamily: 'var(--font-sans)',
-                fontStyle: 'italic',
-                fontSize: rpx(15),
-                color: 'rgba(0, 0, 0, 0.45)',
-              }}
-            >
-              Case studies, side projects, a little bit of everything — enjoy!
-            </p>
-            {/* Two-column masonry — no longer squeezed into one fixed-height
-                screen; the list just grows downward as more projects are
-                added and the panel scrolls (see the outer wrapper's
-                overflowY) instead of everything having to keep re-fitting a
-                shrinking pixel budget. */}
+            {/* Same left/right split as the Playground gallery (see
+                PlayContent.jsx): the tagline only takes up the left half,
+                so the left column sits under it while the right column
+                (nothing above it) starts level with the tagline's own top
+                instead of waiting to clear its height first — same bento
+                effect, same font/size/weight/color as Playground's blurb. */}
             <div style={{ display: 'flex', gap: rpx(16), alignItems: 'flex-start' }}>
-              {chunkIntoColumns(SLOTS, 2).map((column, i) => (
-                <div
-                  key={i}
+              <div style={{ width: '50%', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <p
+                  style={{
+                    margin: `0 0 ${rpx(24)} 0`,
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: rpx(24),
+                    lineHeight: 1.4,
+                    color: 'rgba(0, 0, 0, 0.6)',
+                  }}
+                >
+                  Case Studies, Side Projects, a little bit of everything, enjoy!
+                </p>
+                <motion.div
+                  initial={{ opacity: 0, y: 22 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.9, delay: 0, ease: [0.16, 1, 0.3, 1] } }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: rpx(48), minWidth: 0 }}
+                >
+                  {LEFT_COLUMN.map((slot) => (
+                    <PreviewBox key={slot.id} slot={slot} onOpen={(id) => navigate(`/work/${id}`)} />
+                  ))}
+                </motion.div>
+              </div>
+
+              <div style={{ width: '50%', display: 'flex', alignItems: 'flex-start', minWidth: 0 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 22 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.9, delay: 0.12, ease: [0.16, 1, 0.3, 1] } }}
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -283,11 +364,11 @@ export default function WorkContent() {
                     minWidth: 0,
                   }}
                 >
-                  {column.map((slot) => (
+                  {RIGHT_COLUMN.map((slot) => (
                     <PreviewBox key={slot.id} slot={slot} onOpen={(id) => navigate(`/work/${id}`)} />
                   ))}
-                </div>
-              ))}
+                </motion.div>
+              </div>
             </div>
           </motion.div>
         )}

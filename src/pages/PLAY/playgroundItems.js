@@ -9,21 +9,13 @@
 // a new tab when a piece is clicked.
 // `software` — what each piece was made in, shown as a small subtitle
 // under the title (see PlayContent.jsx).
+// Order here drives round-robin column placement in PlayContent.jsx's
+// 4-column grid (index % 4 → column) — with 6 items across 4 columns, the
+// first two columns always end up with 2 items and the last two with 1
+// each, so an item's position in this array is what puts it in a
+// particular left-to-right column. The two Olympic tickets sit at indexes
+// 2 and 3 specifically so they land in the two solo (rightmost) columns.
 export const PLAYGROUND_ITEMS = [
-  {
-    id: 'beach-olympic-ticket',
-    title: 'Beach Volleyball Olympic Ticket',
-    software: 'Adobe Illustrator, Adobe InDesign',
-    thumbnails: ['/playground/beach-olympic-ticket.png'],
-    file: '/playground/beach-olympic-ticket.pdf',
-  },
-  {
-    id: 'gym-olympic-ticket',
-    title: 'Gymnastics Olympic Ticket',
-    software: 'Adobe Illustrator, Adobe InDesign',
-    thumbnails: ['/playground/gym-olympic-ticket.png'],
-    file: '/playground/gym-olympic-ticket.pdf',
-  },
   {
     id: 'menu-design',
     title: 'Menu Design',
@@ -45,6 +37,20 @@ export const PLAYGROUND_ITEMS = [
       '/playground/opt-mini-mag-page-3.jpg',
     ],
     file: '/playground/mini-mag.pdf',
+  },
+  {
+    id: 'beach-olympic-ticket',
+    title: 'Beach Volleyball Olympic Ticket',
+    software: 'Adobe Illustrator, Adobe InDesign',
+    thumbnails: ['/playground/beach-olympic-ticket.png'],
+    file: '/playground/beach-olympic-ticket.pdf',
+  },
+  {
+    id: 'gym-olympic-ticket',
+    title: 'Gymnastics Olympic Ticket',
+    software: 'Adobe Illustrator, Adobe InDesign',
+    thumbnails: ['/playground/gym-olympic-ticket.png'],
+    file: '/playground/gym-olympic-ticket.pdf',
   },
   {
     id: 'colour-palette',

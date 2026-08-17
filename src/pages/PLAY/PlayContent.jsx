@@ -7,9 +7,10 @@ import { PLAYGROUND_ITEMS } from './playgroundItems.js'
  * Body content for the expanded PLAYGROUND section — restyled to match the
  * WHO gallery's bento/masonry look (see WhoGallery.jsx) instead of the old
  * "list on the left, single live preview on the right" layout: a few fixed
- * columns, items distributed round-robin, each image at its own natural
- * aspect ratio (no cropping), same rpx(4) corner rounding and rpx(16)
- * gaps, same staggered left-to-right column fade-in.
+ * columns (now hand-assembled rather than round-robin-chunked — see
+ * LEFT_COLUMNS/RIGHT_COLUMNS below), each image at its own natural aspect
+ * ratio (no cropping), same rpx(4) corner rounding and rpx(16) gaps, same
+ * staggered left-to-right column fade-in.
  *
  * Unlike WHO, this doesn't need PagedGallery's wheel-to-page mechanic —
  * there are only a handful of pieces so far and this panel already scrolls
@@ -27,10 +28,8 @@ import { PLAYGROUND_ITEMS } from './playgroundItems.js'
  * lightbox also has its own explicit "Open original file" link for anyone
  * who wants the real PDF/browser viewer.
  */
-function chunkIntoColumns(items, columns) {
-  const cols = Array.from({ length: columns }, () => [])
-  items.forEach((item, i) => cols[i % columns].push(item))
-  return cols
+function findItem(id) {
+  return PLAYGROUND_ITEMS.find((item) => item.id === id)
 }
 
 // Multi-page pieces (Menu Design, Mini Mag) show every page stacked, not
@@ -229,64 +228,78 @@ function PlaygroundLightbox({ item, onClose }) {
   )
 }
 
+// One column of stacked pieces — pulled out so it can be rendered in either
+// the left half (below the blurb) or the right half (level with the
+// blurb's own top) with the same markup, just a different `delay` for the
+// left-to-right fade-in stagger.
+function PlayColumn({ column, delay, onOpen }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 22 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] } }}
+      style={{ display: 'flex', flexDirection: 'column', gap: rpx(16), flex: '1 1 0', minWidth: 0 }}
+    >
+      {column.map((item) => (
+        <PlaygroundPiece key={item.id} item={item} onOpen={onOpen} />
+      ))}
+    </motion.div>
+  )
+}
+
+// Columns are hand-assembled now rather than round-robin-chunked — the
+// layout isn't a uniform grid anymore (see the left/right split below), so
+// which piece goes where needs to be explicit:
+//   left half:  Menu Design and Mini Mag, solo — this half sits under the
+//     blurb, so its columns stay short and simple.
+//   right half: each Olympic ticket gets Colour Palette/Art Deco stacked
+//     underneath it — this half starts level with the blurb's own top
+//     (more open vertical room), so pairing a small ticket with a design
+//     piece fills that extra height instead of leaving it empty.
+const LEFT_COLUMNS = [[findItem('menu-design')], [findItem('mini-mag')]]
+const RIGHT_COLUMNS = [
+  [findItem('beach-olympic-ticket'), findItem('colour-palette')],
+  [findItem('gym-olympic-ticket'), findItem('art-deco')],
+]
+
 export default function PlayContent() {
-  const columns = chunkIntoColumns(PLAYGROUND_ITEMS, 4)
   const [openItem, setOpenItem] = useState(null)
 
   return (
     <div style={{ padding: `${rpx(24)} ${rpx(64)} ${rpx(64)}` }}>
-      <p
-        style={{
-          margin: `0 0 ${rpx(24)} 0`,
-          fontFamily: 'var(--font-sans)',
-          fontSize: rpx(16),
-          lineHeight: 1.4,
-          color: 'rgba(0, 0, 0, 0.6)',
-          maxWidth: '90%',
-        }}
-      >
-        When I'm not doing product design in Figma, I'm usually making something just because, in Adobe Illustrator
-        and InDesign. Click any piece to open the full file.
-      </p>
-
-      {/* Mini Mag's, Menu Design's, Art Deco's, and Colour Palette's
-          columns get extra flex-grow so they render noticeably bigger
-          than the others — they're the pieces worth lingering on, and
-          giving them more room reads more intentional than every column
-          being forced to the same width regardless of what's in it. Art
-          Deco and Colour Palette each share a column with an Olympic
-          ticket, so those tickets grow along with them — same tradeoff
-          as any column-based sizing. */}
       <div style={{ display: 'flex', gap: rpx(16), alignItems: 'flex-start' }}>
-        {columns.map((column, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.9, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] } }}
+        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <p
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: rpx(16),
-              flex: column.some((item) =>
-                ['mini-mag', 'menu-design', 'art-deco', 'colour-palette'].includes(item.id),
-              )
-                ? '1.6 1 0'
-                : '1 1 0',
-              minWidth: 0,
+              margin: `0 0 ${rpx(24)} 0`,
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(24),
+              lineHeight: 1.4,
+              color: 'rgba(0, 0, 0, 0.6)',
             }}
           >
-            {column.map((item) => (
-              <PlaygroundPiece key={item.id} item={item} onOpen={setOpenItem} />
+            When I'm not doing product design in Figma, I'm usually making something just because, in Adobe
+            Illustrator and InDesign. Click any piece to open the full file.
+          </p>
+
+          <div style={{ display: 'flex', gap: rpx(16), alignItems: 'flex-start' }}>
+            {LEFT_COLUMNS.map((column, i) => (
+              <PlayColumn key={i} column={column} delay={i * 0.12} onOpen={setOpenItem} />
             ))}
-          </motion.div>
-        ))}
+          </div>
+        </div>
+
+        <div style={{ width: '50%', display: 'flex', gap: rpx(16), alignItems: 'flex-start' }}>
+          {RIGHT_COLUMNS.map((column, i) => (
+            <PlayColumn key={i} column={column} delay={(i + 2) * 0.12} onOpen={setOpenItem} />
+          ))}
+        </div>
       </div>
 
       <p
         style={{
           margin: `${rpx(32)} 0 0 0`,
           fontFamily: 'var(--font-sans)',
-          fontSize: rpx(14),
+          fontSize: rpx(18),
           color: 'rgba(0, 0, 0, 0.35)',
         }}
       >
