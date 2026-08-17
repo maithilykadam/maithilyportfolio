@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
 const DOT_SIZE = 12
 const RING_SIZE_BUTTON = 20
+const BADGE_SIZE = 32
 const NAVY = '#1e3a8a'
 
 // Simple open-eye outline — the reference pill's icon, redrawn as an
@@ -17,6 +19,18 @@ function EyeIcon({ size = 16 }) {
   )
 }
 
+// Diagonal "opens in a new view" arrow — used by the `expand` badge
+// instead of a text label, for triggers packed too close together for a
+// wide pill to read cleanly (see PlayContent.jsx).
+function ArrowUpRightIcon({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25">
+      <path d="M7 17 17 7" strokeLinecap="round" />
+      <path d="M8 7h9v9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 // `button` (every other clickable — links, nav words, resume, etc.) uses
 // the same soft/translucent language on the ring rather than a solid
 // opaque stroke — a solid ring was cutting right across small link text.
@@ -24,11 +38,13 @@ const DOT_VARIANTS = {
   default: { width: DOT_SIZE, height: DOT_SIZE, opacity: 1 },
   ring: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
   button: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
+  expand: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
 }
 
 const RING_VARIANTS = {
   default: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
   ring: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
+  expand: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
   button: {
     width: RING_SIZE_BUTTON,
     height: RING_SIZE_BUTTON,
@@ -50,9 +66,16 @@ const RING_VARIANTS = {
  *   button — every other clickable (links, nav words, resume, etc.): a
  *     small soft ring around a hidden dot.
  *   ring — case studies specifically: the dot/ring both hide and a solid
- *     "VIEW CASE STUDY" pill (navy, matching the reference mockup's shape
- *     — pill + eye icon + label — just navy instead of orange) takes
- *     over completely instead of coexisting with a shape cursor.
+ *     pill (navy, matching the reference mockup's shape — pill + eye icon
+ *     + label — just navy instead of orange) takes over completely
+ *     instead of coexisting with a shape cursor. The pill's label text is
+ *     read from the hovered element's own `data-cursor-label` attribute
+ *     (falling back to "VIEW CASE STUDY").
+ *   expand — same idea as `ring` (opens into its own full view) but for
+ *     triggers packed too close together for a wide text pill to read
+ *     cleanly without constantly overlapping its neighbors (the
+ *     playground pieces) — a small solid navy circle with a plain
+ *     diagonal arrow, no label.
  *
  * All three layers sit in one positioned wrapper that tracks the pointer,
  * so they're always concentric regardless of which is visible — centered
@@ -68,10 +91,22 @@ const RING_VARIANTS = {
  */
 export default function CustomCursor() {
   const [variant, setVariant] = useState('default')
+  const [label, setLabel] = useState('VIEW CASE STUDY')
   const x = useMotionValue(-100)
   const y = useMotionValue(-100)
   const springX = useSpring(x, { stiffness: 700, damping: 40, mass: 0.25 })
   const springY = useSpring(y, { stiffness: 700, damping: 40, mass: 0.25 })
+  const location = useLocation()
+
+  // A click that navigates (e.g. a case-study box) removes the hovered
+  // element from the DOM instead of the mouse ever actually leaving it, so
+  // no `mouseout` ever fires — without this, whatever hover variant was
+  // showing (the "VIEW CASE STUDY" pill, a button ring, ...) stays stuck
+  // on screen after the click, floating over content that was never
+  // meant to trigger it. Resetting on every route change covers it.
+  useEffect(() => {
+    setVariant('default')
+  }, [location.pathname])
 
   useEffect(() => {
     const handleMove = (e) => {
@@ -80,7 +115,10 @@ export default function CustomCursor() {
     }
     const handleOver = (e) => {
       const target = e.target.closest?.('[data-cursor-hover]')
-      if (target) setVariant(target.getAttribute('data-cursor-hover'))
+      if (target) {
+        setVariant(target.getAttribute('data-cursor-hover'))
+        setLabel(target.getAttribute('data-cursor-label') ?? 'VIEW CASE STUDY')
+      }
     }
     const handleOut = (e) => {
       if (e.target.closest?.('[data-cursor-hover]')) setVariant('default')
@@ -96,6 +134,7 @@ export default function CustomCursor() {
   }, [x, y])
 
   const isPill = variant === 'ring'
+  const isBadge = variant === 'expand'
 
   return (
     <motion.div
@@ -164,8 +203,34 @@ export default function CustomCursor() {
             letterSpacing: '0.05em',
           }}
         >
-          VIEW CASE STUDY
+          {label}
         </span>
+      </motion.div>
+
+      {/* Badge — expand hover (playground pieces). A plain circle + arrow,
+          no text, so it stays legible packed tightly between pieces
+          instead of a wide pill constantly overlapping its neighbors. */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: isBadge ? 1 : 0, scale: isBadge ? 1 : 0.8 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          translate: '-50% -50%',
+          width: BADGE_SIZE,
+          height: BADGE_SIZE,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: NAVY,
+          color: '#ffffff',
+          boxShadow: '0 8px 24px rgba(30, 58, 138, 0.3)',
+        }}
+      >
+        <ArrowUpRightIcon size={14} />
       </motion.div>
     </motion.div>
   )

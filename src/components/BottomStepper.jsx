@@ -89,8 +89,15 @@ function NavWord({ section, isActive, onClick }) {
  * meant it barely registered as a shape. Padding, shadow strength, and
  * the resting (non-active, non-hovered) text color are all bumped up so
  * it reads clearly at a glance instead of needing to be looked for.
+ *
+ * `active` and `activeLabel` are deliberately separate: `active` still
+ * drives the pill's background fill (a case study is visually part of the
+ * WORK panel, so the fill stays on), but `activeLabel` — which Shell.jsx
+ * sets to null while viewing a case study sub-page — controls which word
+ * actually gets the underline. Technically you're not on the WORK grid
+ * itself at that point, so WORK shouldn't read as "the current page."
  */
-export default function BottomStepper({ active, sections, onSelect }) {
+export default function BottomStepper({ active, activeLabel = active, sections, onSelect }) {
   const needsFill = active === 'home' || active === 'who' || active === 'work' || active === 'play'
 
   return (
@@ -128,7 +135,7 @@ export default function BottomStepper({ active, sections, onSelect }) {
         {sections.map((section, i) => (
           <div key={section} style={{ display: 'flex', alignItems: 'center', gap: rpx(18) }}>
             {i > 0 && <Divider />}
-            <NavWord section={section} isActive={active === section} onClick={() => onSelect(section)} />
+            <NavWord section={section} isActive={activeLabel === section} onClick={() => onSelect(section)} />
           </div>
         ))}
       </motion.div>

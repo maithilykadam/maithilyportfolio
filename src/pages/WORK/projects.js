@@ -1,6 +1,13 @@
 // Shared case-study list — used by the home page's hover list and (later)
 // the full WORK page. Add real preview images/content here as they're ready.
 //
+// Not every entry here is necessarily shown in the WORK grid at once — see
+// WORK_GRID_IDS in WorkContent.jsx, which picks which projects actually
+// fill the 4 grid slots by id. Oakville/Milton Humane Society stays defined
+// here (previewGroups and all) even while it's not one of the 4 visible
+// slots, so that work isn't lost — just swap its id into WORK_GRID_IDS
+// whenever it's ready to go back on display.
+//
 // `previewGroups` — Figma exports shown as a rotating gallery in the
 // floating preview panel (ProjectPreview.jsx) when this case study is
 // hovered: each inner array is one group, shown as a full-width vertical
@@ -11,8 +18,14 @@
 // project instead of a run of near-identical admin screens.
 export const PROJECTS = [
   {
+    id: 'bitesize',
+    label: '01 // Bitesize',
+    description: null,
+    previewColor: '#dce8d0',
+  },
+  {
     id: 'oakville-milton-humane-society',
-    label: '01 // Oakville and Milton Humane Society',
+    label: '02 // Oakville and Milton Humane Society',
     description: 'Redesigning the digital adoption experience',
     previewColor: '#c9d6e8',
     previewGroups: [
@@ -40,19 +53,19 @@ export const PROJECTS = [
   },
   {
     id: 'serviceontario-integration',
-    label: '02 // ServiceOntario Integration',
+    label: '03 // ServiceOntario Integration',
     description: 'Enterprise tools for government services',
     previewColor: '#d8cbe0',
   },
   {
     id: 'orbit-mobile-design',
-    label: '03 // Orbit Mobile Design',
+    label: '04 // Orbit Mobile Design',
     description: 'Helping students discover campus events',
     previewColor: '#cfe0d3',
   },
   {
     id: 'ophelia-ai-interface',
-    label: '04 // Ophelia AI Interface',
+    label: '05 // Ophelia AI Interface',
     description: 'An infinite AI canvas for directing image and video generation',
     previewColor: '#e8d4c9',
   },

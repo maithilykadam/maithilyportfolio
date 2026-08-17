@@ -97,12 +97,13 @@ function PlaceholderBox({ area, onClick, video, title }) {
  * imagery goes directly into these boxes later, no separate preview
  * mechanism needed. Each box still jumps to the full WORK page on click.
  *
- * `onNavigate` — go to the WORK grid (wired to the OMHS/Bitesize boxes,
- * which don't have their own case study yet). `onNavigateToOphelia` — go
- * straight into the Ophelia case study instead of the grid, since that
- * one's a real project now (wired to the Ophelia box specifically).
+ * `onNavigate` — go to the WORK grid (wired to the Bitesize box, which
+ * doesn't have its own case study yet). `onNavigateToOphelia` /
+ * `onNavigateToOMHS` — go straight into that project's case study instead
+ * of the grid, since those are real projects now (wired to the Ophelia and
+ * OMHS boxes specifically).
  */
-export default function WorkHomeContent({ onNavigate, onNavigateToOphelia }) {
+export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToOMHS }) {
   return (
     <>
       {/* "WORK" label removed — the top nav (now living at the top of the
@@ -156,7 +157,12 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia }) {
           video={{ src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' }}
           title="Ophelia AI Interface"
         />
-        <PlaceholderBox area="bottomLeft" onClick={onNavigate} title="OMHS" />
+        <PlaceholderBox
+          area="bottomLeft"
+          onClick={onNavigateToOMHS}
+          video={{ src: '/home/humanesociety/humanesociety-demo.mp4', poster: '/home/humanesociety/humanesociety-demo-poster.jpg' }}
+          title="OMHS"
+        />
         <PlaceholderBox
           area="bottomRight"
           onClick={onNavigate}

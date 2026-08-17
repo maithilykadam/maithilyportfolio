@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import ExpandedHeader from './ExpandedHeader.jsx'
 import PlaygroundRail from './PlaygroundRail.jsx'
 import BottomStepper from './BottomStepper.jsx'
 import ResumeLink from './ResumeLink.jsx'
+import ContactLink from './ContactLink.jsx'
 import CustomCursor from './CustomCursor.jsx'
 import HeroContent from '../pages/Landing/HeroContent.jsx'
 import WhoContent from '../pages/WHO/WhoContent.jsx'
@@ -71,6 +72,15 @@ const FLIP_VARIANTS = {
 // control are used instead: no gesture to misinterpret.
 export default function Shell({ active }) {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Null while viewing a case study (a /work/:projectId sub-path) rather
+  // than the WORK grid itself — passed to BottomStepper as `activeLabel`
+  // so WORK's underline turns off there (see BottomStepper.jsx), even
+  // though `active` itself stays 'work' the whole time for the flip-panel
+  // logic below.
+  const isCaseStudyPage = active === 'work' && Boolean(location.pathname.split('/')[2])
+  const navActiveLabel = isCaseStudyPage ? null : active
 
   // Which WHO photo category is active ("all" by default) — lifted up here
   // because the filter pills live in the header (a sibling of WhoContent),
@@ -185,16 +195,20 @@ export default function Shell({ active }) {
     else navigate(path)
   }
 
-  // Same idea as goTo, but for landing directly on one specific case
-  // study instead of the WORK grid — passes the project id through
-  // router state (read by WorkContent.jsx via useLocation) rather than a
-  // dedicated per-project route/URL, since these aren't real standalone
-  // pages yet. Used by the home page's video box (see WorkHomeContent
-  // usage below) so clicking Ophelia opens straight into that case study
-  // instead of dropping onto the grid first.
+  // Same idea as goTo, but for landing directly on one specific case study
+  // instead of the WORK grid — a real /work/:projectId route (read by
+  // WorkContent.jsx straight off the URL) rather than router state layered
+  // on top of the plain /work path. That's what makes a case study
+  // genuinely its own page: it has its own distinct URL, so plain "go to
+  // /work" (the WORK nav item, back button, etc.) always lands on the grid
+  // with no leftover state to clear, and the browser's own back/forward
+  // buttons and bookmarking/sharing a case-study link work natively too.
+  // Used by the home page's video box (see WorkHomeContent usage below) so
+  // clicking Ophelia opens straight into that case study instead of
+  // dropping onto the grid first.
   const goToProject = (projectId) => (e) => {
     e.stopPropagation()
-    navigate('/work', { state: { openId: projectId } })
+    navigate(`/work/${projectId}`)
   }
 
   return (
@@ -247,7 +261,11 @@ export default function Shell({ active }) {
                   width: `calc(100vw - ${rpx(HOME_WORK_OFFSET)})`,
                 }}
               >
-                <WorkHomeContent onNavigate={goTo('/work')} onNavigateToOphelia={goToProject('ophelia-ai-interface')} />
+                <WorkHomeContent
+                  onNavigate={goTo('/work')}
+                  onNavigateToOphelia={goToProject('ophelia-ai-interface')}
+                  onNavigateToOMHS={goToProject('oakville-milton-humane-society')}
+                />
               </div>
 
               {/* Collapsed PLAYGROUND rail — home page only, per the "keep
@@ -331,10 +349,13 @@ export default function Shell({ active }) {
       {/* Resume — fixed to the bottom-left corner across every panel. */}
       <ResumeLink active={active} />
 
+      {/* Contact — the mirror image on the bottom-right, same treatment. */}
+      <ContactLink active={active} />
+
       {/* Bottom nav — small dots (per the sketch) that grow and reveal a
           label on hover; clicking one jumps straight to that section
           rather than stepping through the panels in between. */}
-      <BottomStepper active={active} sections={SECTIONS} onSelect={jumpTo} />
+      <BottomStepper active={active} activeLabel={navActiveLabel} sections={SECTIONS} onSelect={jumpTo} />
 
       {/* Custom cursor — mounted once here (not per-panel) so it persists
           across every page instead of remounting/flickering on

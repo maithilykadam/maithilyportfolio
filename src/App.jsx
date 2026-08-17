@@ -12,9 +12,17 @@ const ACTIVE_BY_PATH = {
 // "active" section changes as the URL changes, which is what lets the
 // columns animate their width (sliding-door effect) instead of the whole
 // page unmounting/remounting on navigation.
+//
+// Matched on just the first path segment (not the full pathname) so a real
+// case-study route like /work/ophelia-ai-interface still resolves to the
+// "work" section — same flip panel, no re-flip when moving between the
+// grid and a case study, just a different sub-path within it. See
+// WorkContent.jsx, which reads that second segment itself to know which
+// case study (if any) to show.
 export default function App() {
   const location = useLocation()
-  const active = ACTIVE_BY_PATH[location.pathname] ?? 'home'
+  const firstSegment = '/' + location.pathname.split('/')[1]
+  const active = ACTIVE_BY_PATH[firstSegment] ?? 'home'
 
   return <Shell active={active} />
 }
