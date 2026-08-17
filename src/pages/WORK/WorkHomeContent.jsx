@@ -97,13 +97,12 @@ function PlaceholderBox({ area, onClick, video, title }) {
  * imagery goes directly into these boxes later, no separate preview
  * mechanism needed. Each box still jumps to the full WORK page on click.
  *
- * `onNavigate` — go to the WORK grid (wired to the Bitesize box, which
- * doesn't have its own case study yet). `onNavigateToOphelia` /
- * `onNavigateToOMHS` — go straight into that project's case study instead
- * of the grid, since those are real projects now (wired to the Ophelia and
- * OMHS boxes specifically).
+ * `onNavigate` — go to the WORK grid (used by the "view more projects"
+ * link). `onNavigateToOphelia` / `onNavigateToOMHS` / `onNavigateToBitesize`
+ * — go straight into that project's case study instead of the grid, wired
+ * to the Ophelia, OMHS, and Bitesize boxes specifically.
  */
-export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToOMHS }) {
+export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToOMHS, onNavigateToBitesize }) {
   return (
     <>
       {/* "WORK" label removed — the top nav (now living at the top of the
@@ -165,7 +164,7 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNav
         />
         <PlaceholderBox
           area="bottomRight"
-          onClick={onNavigate}
+          onClick={onNavigateToBitesize}
           video={{ src: '/home/bitesize/bitesize-demo.mp4', poster: '/home/bitesize/bitesize-demo-poster.jpg' }}
           title="Bitesize"
         />

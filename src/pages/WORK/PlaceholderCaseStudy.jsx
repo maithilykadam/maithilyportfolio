@@ -3,52 +3,33 @@ import { motion } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
 import ScreenFrame from './ScreenFrame.jsx'
 
-// Same navy used for the custom cursor's case-study hover state — reused
-// here so "active nav item" reads as the same accent color everywhere on
-// the site, not a one-off.
+// Same navy used for the custom cursor's case-study hover state and
+// OpheliaCaseStudy's active nav item — reused here so "active nav item"
+// still reads as the same accent color across every case study, not a
+// one-off.
 const NAVY = '#1e3a8a'
 
-// Section list from the user's mockup — left sidebar nav, each one a
-// scroll target further down the page rather than a separate route (this
-// stays a single scrollable case study, not a multi-page flow). For now
-// Overview holds the preview video and Solution holds the screen grid —
-// more sections/content get added back in later.
 const SECTIONS = ['Overview', 'Solution']
 
-// The 7 screens the user dropped into public/home/ophelia, optimized down
-// from ~40MB combined to ~1.1MB (see conversion pass). `top`/`center`
-// objectPosition picked per-screenshot so nothing important gets cropped
-// off inside the frame's fixed aspect ratio.
-const SCREENS = [
-  { src: '/home/ophelia/ophelia-default.jpg', alt: 'Explore AI Canvas — home', objectPosition: 'top' },
-  { src: '/home/ophelia/ophelia-gallery-view.jpg', alt: 'Gallery view' },
-  { src: '/home/ophelia/ophelia-macbook-view.jpg', alt: 'Canvas view' },
-  { src: '/home/ophelia/ophelia-multiple-generations.jpg', alt: 'Multiple generations' },
-  { src: '/home/ophelia/ophelia-projects-home-hover.jpg', alt: 'Projects home — hover state' },
-  { src: '/home/ophelia/ophelia-scroll-view.jpg', alt: 'Scroll view' },
-  { src: '/home/ophelia/ophelia-selection.jpg', alt: 'Selection state' },
-]
-
 /**
- * Full Ophelia case study — replaces the generic title/description overlay
- * specifically for this one project (see WorkContent.jsx). Laid out per the
- * user's mockup: a left sidebar (Back link + section nav) that stays fixed
- * while the right side scrolls, a serif title, the same preview video used
- * on the home page box, a grid of the real product screens (each in a flat
- * device frame), then one long-form section per sidebar item.
+ * Generic case-study page — same structure as OpheliaCaseStudy.jsx (fixed
+ * left sidebar with Back + scroll-spy section nav, serif title + tagline,
+ * an Overview section with the preview video on the left and a blurb on
+ * the right), but data-driven instead of bespoke, so a project can get its
+ * own real case-study page just by passing in its title/video/text rather
+ * than needing a whole new file written from scratch. Used for Bitesize
+ * and OMHS (see WorkContent.jsx) — Ophelia stays on its own dedicated
+ * component since its Solution section already has real finished screens
+ * and a longer write-up.
  *
- * Sidebar nav scrolls the content via refs + scrollIntoView rather than
- * `#hash` anchors — this is a client-side-routed SPA already living inside
- * a `/work` route, so hash links would fight with react-router instead of
- * just scrolling.
- *
- * The nav also tracks which section is currently in view (via
- * IntersectionObserver scoped to the scrolling content pane, not the
- * window — the page itself never scrolls, only this inner pane does) and
- * turns that item's text navy, same accent as the custom cursor's
- * case-study hover state.
+ * `screens` is optional and empty for both current uses — the Solution
+ * section just shows a small "coming soon" note in that case (same voice
+ * as Ophelia's own screens note) instead of an empty grid. Once real
+ * wireframes are dropped into each project's public/home/... folder, just
+ * pass a `screens` array here (same shape Ophelia's SCREENS uses) and the
+ * grid renders itself — nothing else about the page needs to change.
  */
-export default function OpheliaCaseStudy({ onBack }) {
+export default function PlaceholderCaseStudy({ title, tagline, video, overviewText, screens = [], onBack }) {
   const sectionRefs = useRef([])
   const contentRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -70,10 +51,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           }
         })
       },
-      // Treat a section as "active" once it's crossed roughly a third of
-      // the way down the pane, rather than the instant its top edge
-      // appears at the very bottom — feels closer to "this is what
-      // you're actually looking at."
       { root, rootMargin: '0px 0px -60% 0px', threshold: 0 }
     )
 
@@ -166,20 +143,23 @@ export default function OpheliaCaseStudy({ onBack }) {
             color: 'var(--color-text)',
           }}
         >
-          Ophelia Canvas AI
+          {title}
         </h1>
-        <p
-          style={{
-            margin: `${rpx(10)} 0 0 0`,
-            fontFamily: 'var(--font-sans)',
-            fontSize: rpx(16),
-            color: 'rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          An infinite AI canvas for directing image and video generation
-        </p>
+        {tagline && (
+          <p
+            style={{
+              margin: `${rpx(10)} 0 0 0`,
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(16),
+              color: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            {tagline}
+          </p>
+        )}
 
-        {/* Overview — a placeholder blurb plus the preview video. */}
+        {/* Overview — the preview video on the left, the blurb filling the
+            open space to its right, same as Ophelia. */}
         <section
           ref={(el) => {
             sectionRefs.current[0] = el
@@ -197,9 +177,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           >
             Overview
           </h2>
-          {/* Video on the left, the blurb filling the open space to its
-              right — rather than stacked, so neither is competing for the
-              full page width alone. */}
           <div
             style={{
               marginTop: rpx(20),
@@ -208,24 +185,26 @@ export default function OpheliaCaseStudy({ onBack }) {
               gap: rpx(40),
             }}
           >
-            <div
-              style={{
-                width: '50%',
-                flexShrink: 0,
-                border: '1px solid rgba(0, 0, 0, 0.15)',
-                overflow: 'hidden',
-              }}
-            >
-              <video
-                src="/home/ophelia/ophelia-demo-6.mp4"
-                poster="/home/ophelia/ophelia-demo-6-poster.jpg"
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
-            </div>
+            {video && (
+              <div
+                style={{
+                  width: '50%',
+                  flexShrink: 0,
+                  border: '1px solid rgba(0, 0, 0, 0.15)',
+                  overflow: 'hidden',
+                }}
+              >
+                <video
+                  src={video.src}
+                  poster={video.poster}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
+              </div>
+            )}
             <p
               style={{
                 margin: 0,
@@ -236,16 +215,13 @@ export default function OpheliaCaseStudy({ onBack }) {
                 color: 'rgba(0, 0, 0, 0.6)',
               }}
             >
-              Ophelia is an infinite AI canvas for creators who want to direct their tools rather than
-              hand the work over to them. Instead of one prompt producing one static image, Ophelia
-              treats generation as an ongoing, editable process — prompt, refine, and stitch images
-              and video together on the same canvas, the way a director works with a crew rather than
-              the way a search box returns a result.
+              {overviewText}
             </p>
           </div>
         </section>
 
-        {/* Solution — the screen grid. */}
+        {/* Solution — real screens once they exist, a small note in the
+            meantime (see the `screens` doc comment above). */}
         <section
           ref={(el) => {
             sectionRefs.current[1] = el
@@ -263,9 +239,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           >
             Solution
           </h2>
-          {/* Small note — the full write-up isn't ready yet, but the real
-              finished screens are, so they're shown here in the meantime
-              rather than waiting on the rest of the case study. */}
           <p
             style={{
               margin: `${rpx(12)} 0 0 0`,
@@ -275,20 +248,24 @@ export default function OpheliaCaseStudy({ onBack }) {
               color: 'rgba(0, 0, 0, 0.45)',
             }}
           >
-            Full case study coming soon — in the meantime, here are the finished screens.
+            {screens.length > 0
+              ? 'Full case study coming soon — in the meantime, here are the finished screens.'
+              : 'Wireframes coming soon.'}
           </p>
-          <div
-            style={{
-              marginTop: rpx(24),
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: rpx(28),
-            }}
-          >
-            {SCREENS.map((screen) => (
-              <ScreenFrame key={screen.src} {...screen} />
-            ))}
-          </div>
+          {screens.length > 0 && (
+            <div
+              style={{
+                marginTop: rpx(24),
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: rpx(28),
+              }}
+            >
+              {screens.map((screen) => (
+                <ScreenFrame key={screen.src} {...screen} />
+              ))}
+            </div>
+          )}
         </section>
       </motion.div>
     </div>

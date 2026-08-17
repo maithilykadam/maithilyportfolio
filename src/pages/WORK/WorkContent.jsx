@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
 import { PROJECTS } from './projects.js'
 import OpheliaCaseStudy from './OpheliaCaseStudy.jsx'
+import PlaceholderCaseStudy from './PlaceholderCaseStudy.jsx'
 
 // Which projects (by id, from projects.js) actually fill the WORK grid,
 // and in what order — lets a project stay defined in projects.js (with all
@@ -55,6 +56,29 @@ const VIDEO_BY_ID = {
   'oakville-milton-humane-society': {
     src: '/home/humanesociety/humanesociety-demo.mp4',
     poster: '/home/humanesociety/humanesociety-demo-poster.jpg',
+  },
+}
+
+// Data-driven case studies (see PlaceholderCaseStudy.jsx) for projects
+// that don't have a bespoke page like Ophelia's yet — same sidebar/title/
+// Overview structure, just filled in with each project's own video and
+// text instead of a one-off component per project. No `screens` yet for
+// either — real wireframes get dropped into each project's public folder
+// later, at which point a `screens` array here is all that's needed to
+// make the Solution grid appear (see that file's doc comment).
+const CASE_STUDY_DATA = {
+  bitesize: {
+    title: 'Bitesize',
+    video: VIDEO_BY_ID.bitesize,
+    overviewText:
+      'Full write-up coming soon — for now, here’s a look at Bitesize in motion. Wireframes and the rest of the case study will be added here shortly.',
+  },
+  'oakville-milton-humane-society': {
+    title: 'Oakville & Milton Humane Society',
+    tagline: 'Redesigning the digital adoption experience',
+    video: VIDEO_BY_ID['oakville-milton-humane-society'],
+    overviewText:
+      "A redesign of Oakville & Milton Humane Society's digital adoption experience — from browsing and filtering adoptable pets to the admin tools staff use to manage tasks, interaction logs, and user profiles behind the scenes. Wireframes and the full write-up will be added here shortly.",
   },
 }
 
@@ -238,6 +262,10 @@ export default function WorkContent() {
   // skips this container's own padding (its sidebar/content each manage
   // their own) and is handled as its own branch below.
   const isOphelia = openSlot?.id === 'ophelia-ai-interface'
+  // Same full-bleed treatment for any other project with a real (if still
+  // partly placeholder) case-study page — see CASE_STUDY_DATA above.
+  const placeholderCaseStudy = openSlot ? CASE_STUDY_DATA[openSlot.id] : null
+  const isFullCaseStudy = isOphelia || Boolean(placeholderCaseStudy)
 
   return (
     <div
@@ -245,7 +273,7 @@ export default function WorkContent() {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        padding: isOphelia ? 0 : `${rpx(24)} ${rpx(64)} ${rpx(120)}`,
+        padding: isFullCaseStudy ? 0 : `${rpx(24)} ${rpx(64)} ${rpx(120)}`,
         // The grid needs to scroll now that it's no longer squeezed to fit
         // one screen (more projects just keep adding rows below the fold).
         // Harmless for the case-study states too — both size themselves to
@@ -255,7 +283,17 @@ export default function WorkContent() {
         overflowY: 'auto',
       }}
     >
-      <AnimatePresence>
+      {/* mode="wait" — without it, AnimatePresence's default "sync" mode
+          keeps the exiting view (e.g. the full-bleed Ophelia case study)
+          mounted and overlapping on screen with the entering one (the
+          grid) for the length of the exit transition. During that overlap
+          window a click can land on the still-present old view instead of
+          the new one underneath it — e.g. landing back on Ophelia's own
+          content when you meant to click a grid box that happens to sit
+          where Ophelia's video/sidebar still was. Waiting for the exit to
+          finish before mounting the next view removes that overlap
+          entirely. */}
+      <AnimatePresence mode="wait">
         {isOphelia ? (
           <motion.div
             key="ophelia"
@@ -265,6 +303,16 @@ export default function WorkContent() {
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
             <OpheliaCaseStudy onBack={() => navigate('/work')} />
+          </motion.div>
+        ) : placeholderCaseStudy ? (
+          <motion.div
+            key={openSlot.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.3 } }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            style={{ flex: '1 1 auto', minHeight: 0 }}
+          >
+            <PlaceholderCaseStudy {...placeholderCaseStudy} onBack={() => navigate('/work')} />
           </motion.div>
         ) : openSlot ? (
           <motion.div key="expanded" style={{ flex: '1 1 auto', minHeight: 0, position: 'relative' }}>
