@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
 import { PROJECTS } from './projects.js'
 import OpheliaCaseStudy from './OpheliaCaseStudy.jsx'
+import BitesizeCaseStudy from './BitesizeCaseStudy.jsx'
 import PlaceholderCaseStudy from './PlaceholderCaseStudy.jsx'
 
 // Which projects (by id, from projects.js) actually fill the WORK grid,
@@ -67,12 +68,6 @@ const VIDEO_BY_ID = {
 // later, at which point a `screens` array here is all that's needed to
 // make the Solution grid appear (see that file's doc comment).
 const CASE_STUDY_DATA = {
-  bitesize: {
-    title: 'Bitesize',
-    video: VIDEO_BY_ID.bitesize,
-    overviewText:
-      'Full write-up coming soon — for now, here’s a look at Bitesize in motion. Wireframes and the rest of the case study will be added here shortly.',
-  },
   'oakville-milton-humane-society': {
     title: 'Oakville & Milton Humane Society',
     tagline: 'Redesigning the digital adoption experience',
@@ -262,10 +257,14 @@ export default function WorkContent() {
   // skips this container's own padding (its sidebar/content each manage
   // their own) and is handled as its own branch below.
   const isOphelia = openSlot?.id === 'ophelia-ai-interface'
+  // Bitesize also gets its own bespoke case-study page now (see
+  // BitesizeCaseStudy.jsx) instead of the generic data-driven placeholder,
+  // same reasoning as Ophelia above.
+  const isBitesize = openSlot?.id === 'bitesize'
   // Same full-bleed treatment for any other project with a real (if still
   // partly placeholder) case-study page — see CASE_STUDY_DATA above.
   const placeholderCaseStudy = openSlot ? CASE_STUDY_DATA[openSlot.id] : null
-  const isFullCaseStudy = isOphelia || Boolean(placeholderCaseStudy)
+  const isFullCaseStudy = isOphelia || isBitesize || Boolean(placeholderCaseStudy)
 
   return (
     <div
@@ -303,6 +302,16 @@ export default function WorkContent() {
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
             <OpheliaCaseStudy onBack={() => navigate('/work')} />
+          </motion.div>
+        ) : isBitesize ? (
+          <motion.div
+            key="bitesize"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.3 } }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            style={{ flex: '1 1 auto', minHeight: 0 }}
+          >
+            <BitesizeCaseStudy onBack={() => navigate('/work')} />
           </motion.div>
         ) : placeholderCaseStudy ? (
           <motion.div
