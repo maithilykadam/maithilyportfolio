@@ -29,10 +29,21 @@ const SECTIONS = ['Overview', 'Solution']
  * pass a `screens` array here (same shape Ophelia's SCREENS uses) and the
  * grid renders itself — nothing else about the page needs to change.
  */
-export default function PlaceholderCaseStudy({ title, tagline, video, overviewText, screens = [], onBack }) {
+export default function PlaceholderCaseStudy({
+  title,
+  tagline,
+  video,
+  overviewText,
+  screens = [],
+  metadata = [],
+  onBack,
+  onNextProject,
+  nextProjectLabel,
+}) {
   const sectionRefs = useRef([])
   const contentRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [nextHovered, setNextHovered] = useState(false)
 
   const scrollToSection = (index) => {
     sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -158,6 +169,56 @@ export default function PlaceholderCaseStudy({ title, tagline, video, overviewTe
           </p>
         )}
 
+        {/* Metadata strip — same styling as Ophelia's and Bitesize's (bigger
+            labels, spaced across a fixed max width) rather than a smaller
+            one-off, so a project on this generic template still reads as
+            equally finished. Only rendered once real Role/Timeline/Team
+            values exist for a project (see `metadata` prop, passed in from
+            WorkContent.jsx's CASE_STUDY_DATA) rather than always showing a
+            row of "Add this" placeholders. */}
+        {metadata.length > 0 && (
+          <div
+            style={{
+              marginTop: rpx(28),
+              maxWidth: rpx(760),
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: `${rpx(26)} 0`,
+              borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            {metadata.map(({ label, value }) => (
+              <div key={label}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: rpx(14),
+                    fontWeight: 500,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(0, 0, 0, 0.4)',
+                  }}
+                >
+                  {label}
+                </p>
+                <p
+                  style={{
+                    margin: `${rpx(10)} 0 0 0`,
+                    fontFamily: 'var(--font-sans)',
+                    fontStyle: value ? 'normal' : 'italic',
+                    fontSize: rpx(16),
+                    color: value ? 'var(--color-text)' : 'rgba(0, 0, 0, 0.4)',
+                  }}
+                >
+                  {value ?? 'Add this'}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Overview — the preview video on the left, the blurb filling the
             open space to its right, same as Ophelia. */}
         <section
@@ -249,7 +310,7 @@ export default function PlaceholderCaseStudy({ title, tagline, video, overviewTe
             }}
           >
             {screens.length > 0
-              ? 'Full case study coming soon — in the meantime, here are the finished screens.'
+              ? 'Full case study coming soon, in the meantime, here are the finished screens.'
               : 'Wireframes coming soon.'}
           </p>
           {screens.length > 0 && (
@@ -267,6 +328,36 @@ export default function PlaceholderCaseStudy({ title, tagline, video, overviewTe
             </div>
           )}
         </section>
+
+        {/* Next project — same understated treatment as Ophelia's and
+            Bitesize's, a specific next click instead of a generic "see
+            more of my work" CTA. */}
+        {onNextProject && (
+          <div style={{ marginTop: rpx(56), paddingTop: rpx(32), borderTop: '1px solid rgba(0, 0, 0, 0.1)' }}>
+            <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(13), letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.4)' }}>
+              Next case study
+            </p>
+            <motion.button
+              data-cursor-hover="button"
+              onClick={onNextProject}
+              onMouseEnter={() => setNextHovered(true)}
+              onMouseLeave={() => setNextHovered(false)}
+              animate={{ x: nextHovered ? 4 : 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={{
+                marginTop: rpx(8),
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontFamily: 'var(--font-serif)',
+                fontSize: rpx(28),
+                color: NAVY,
+              }}
+            >
+              {nextProjectLabel} →
+            </motion.button>
+          </div>
+        )}
       </motion.div>
     </div>
   )

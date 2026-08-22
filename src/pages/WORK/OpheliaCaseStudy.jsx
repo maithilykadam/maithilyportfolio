@@ -451,11 +451,12 @@ function FlowScreens({ flow }) {
  * turns that item's text navy, same accent as the custom cursor's
  * case-study hover state.
  */
-export default function OpheliaCaseStudy({ onBack }) {
+export default function OpheliaCaseStudy({ onBack, onNextProject, nextProjectLabel }) {
   const sectionRefs = useRef([])
   const contentRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [backHovered, setBackHovered] = useState(false)
+  const [nextHovered, setNextHovered] = useState(false)
 
   const scrollToSection = (index) => {
     sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -583,7 +584,7 @@ export default function OpheliaCaseStudy({ onBack }) {
             color: 'var(--color-text)',
           }}
         >
-          Ophelia Canvas AI
+          Ophelia
         </h1>
         <p
           style={{
@@ -614,9 +615,10 @@ export default function OpheliaCaseStudy({ onBack }) {
         <div
           style={{
             marginTop: rpx(28),
+            maxWidth: rpx(760),
             display: 'flex',
-            gap: rpx(48),
-            padding: `${rpx(18)} 0`,
+            justifyContent: 'space-between',
+            padding: `${rpx(26)} 0`,
             borderTop: HAIRLINE,
             borderBottom: HAIRLINE,
           }}
@@ -627,7 +629,8 @@ export default function OpheliaCaseStudy({ onBack }) {
                 style={{
                   margin: 0,
                   fontFamily: 'var(--font-sans)',
-                  fontSize: rpx(11),
+                  fontSize: rpx(14),
+                  fontWeight: 500,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   color: 'rgba(0, 0, 0, 0.4)',
@@ -637,10 +640,10 @@ export default function OpheliaCaseStudy({ onBack }) {
               </p>
               <p
                 style={{
-                  margin: `${rpx(4)} 0 0 0`,
+                  margin: `${rpx(10)} 0 0 0`,
                   fontFamily: 'var(--font-sans)',
                   fontStyle: value ? 'normal' : 'italic',
-                  fontSize: rpx(15),
+                  fontSize: rpx(16),
                   color: value ? 'var(--color-text)' : 'rgba(0, 0, 0, 0.4)',
                 }}
               >
@@ -1106,6 +1109,36 @@ export default function OpheliaCaseStudy({ onBack }) {
             to know what to change next.
           </p>
         </motion.section>
+
+        {/* Next project — a specific next click instead of a generic "see
+            more of my work" CTA, since the sidebar already handles general
+            navigation back to the grid. */}
+        {onNextProject && (
+          <div style={{ marginTop: rpx(56), maxWidth: rpx(820), paddingTop: rpx(32), borderTop: HAIRLINE }}>
+            <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(13), letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.4)' }}>
+              Next case study
+            </p>
+            <motion.button
+              data-cursor-hover="button"
+              onClick={onNextProject}
+              onMouseEnter={() => setNextHovered(true)}
+              onMouseLeave={() => setNextHovered(false)}
+              animate={{ x: nextHovered ? 4 : 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={{
+                marginTop: rpx(8),
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontFamily: 'var(--font-serif)',
+                fontSize: rpx(28),
+                color: NAVY,
+              }}
+            >
+              {nextProjectLabel} →
+            </motion.button>
+          </div>
+        )}
       </motion.div>
     </div>
   )

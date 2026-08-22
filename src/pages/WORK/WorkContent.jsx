@@ -69,11 +69,16 @@ const VIDEO_BY_ID = {
 // make the Solution grid appear (see that file's doc comment).
 const CASE_STUDY_DATA = {
   'oakville-milton-humane-society': {
-    title: 'Oakville & Milton Humane Society',
-    tagline: 'Redesigning the digital adoption experience',
+    title: 'OMHS',
+    tagline: 'Redesigning the digital adoption experience for Oakville & Milton Humane Society',
     video: VIDEO_BY_ID['oakville-milton-humane-society'],
+    metadata: [
+      { label: 'Role', value: 'Product Designer' },
+      { label: 'Timeline', value: '12 months' },
+      { label: 'Team', value: '4 designers, 2 PMs, 6 developers' },
+    ],
     overviewText:
-      "A redesign of Oakville & Milton Humane Society's digital adoption experience — from browsing and filtering adoptable pets to the admin tools staff use to manage tasks, interaction logs, and user profiles behind the scenes. Wireframes and the full write-up will be added here shortly.",
+      "A redesign of Oakville & Milton Humane Society's digital adoption experience: from browsing and filtering adoptable pets to the admin tools staff use to manage tasks, interaction logs, and user profiles behind the scenes. Wireframes and the full write-up will be added here shortly.",
   },
 }
 
@@ -301,7 +306,11 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <OpheliaCaseStudy onBack={() => navigate('/work')} />
+            <OpheliaCaseStudy
+              onBack={() => navigate('/work')}
+              onNextProject={() => navigate('/work/bitesize')}
+              nextProjectLabel="Bitesize"
+            />
           </motion.div>
         ) : isBitesize ? (
           <motion.div
@@ -311,7 +320,11 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <BitesizeCaseStudy onBack={() => navigate('/work')} />
+            <BitesizeCaseStudy
+              onBack={() => navigate('/work')}
+              onNextProject={() => navigate('/work/oakville-milton-humane-society')}
+              nextProjectLabel="OMHS"
+            />
           </motion.div>
         ) : placeholderCaseStudy ? (
           <motion.div
@@ -321,7 +334,12 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <PlaceholderCaseStudy {...placeholderCaseStudy} onBack={() => navigate('/work')} />
+            <PlaceholderCaseStudy
+              {...placeholderCaseStudy}
+              onBack={() => navigate('/work')}
+              onNextProject={() => navigate('/work/ophelia-ai-interface')}
+              nextProjectLabel="Ophelia"
+            />
           </motion.div>
         ) : openSlot ? (
           <motion.div key="expanded" style={{ flex: '1 1 auto', minHeight: 0, position: 'relative' }}>
