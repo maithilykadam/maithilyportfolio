@@ -86,10 +86,8 @@ const FLOWS = [
     title: 'A library, not a blank canvas',
     caption: 'Recent work, search, and templates surface up front, so starting never means staring at an empty page.',
     video: { src: '/home/ophelia/new-project-flow.mp4', poster: '/home/ophelia/new-project-flow-poster.jpg' },
-    videoCaption: 'In motion: starting a new project, prompt to first result',
-    screens: [
-      { src: '/home/ophelia/ophelia-gallery-view.jpg', alt: 'Gallery view', note: 'Full-screen review isolates one result so it can actually be judged, not skimmed.' },
-    ],
+    videoCaption: 'Starting a new project, prompt to first result.',
+    screens: [],
   },
   {
     nav: 'Editing Tools',
@@ -97,7 +95,7 @@ const FLOWS = [
     title: 'Edit in place, not in another tab',
     caption: 'Prompting, natural-language edits, and timeline trims all happen right where the work already lives.',
     video: { src: '/home/ophelia/adding-media-to-board.mp4', poster: '/home/ophelia/adding-media-to-board-poster.jpg' },
-    videoCaption: 'In motion: adding a new image or video straight onto the board, alongside what’s already there',
+    videoCaption: 'Adding a new image or video straight onto the board, alongside what’s already there.',
     // No static screens here — the video above already covers this flow
     // live, and the old ones (canvas view, scroll view, ask-for-changes)
     // were stale next to it once the site had moved on since they were shot.
@@ -109,10 +107,9 @@ const FLOWS = [
     title: 'More than one reference at a time',
     caption: 'Multi-reference and multi-select combine several images or past generations into a single prompt.',
     video: { src: '/home/ophelia/selection-ask-flow.mp4', poster: '/home/ophelia/selection-ask-flow-poster.jpg' },
-    videoCaption: 'In motion: selecting multiple assets, then asking for a change in plain language',
+    videoCaption: 'Selecting multiple assets, then asking for a change in plain language.',
     screens: [
       { src: '/home/ophelia/ophelia-multiple-generations.jpg', alt: 'Multiple generations', note: 'Variations render side by side, so comparing options doesn’t mean regenerating one at a time.' },
-      { src: '/home/ophelia/ophelia-selection.jpg', alt: 'Selection state', note: 'Selecting an asset surfaces just the edit actions relevant to it.' },
       { src: '/home/ophelia/wireframes/selection.png', alt: 'Multiple assets selected and attached', note: 'Batch-selecting several assets turns combining references into one action.' },
     ],
   },
@@ -176,37 +173,11 @@ const DETAILS = [
   },
 ]
 
-// Real excerpts from the founders' own written manifesto (their words, not
-// invented) — one short line pulled from each of its 6 named parts, kept to
-// a single punchy sentence or two apiece so this reads as a quick gut-check
-// of the thinking behind Ophelia rather than the full manifesto reproduced
-// on the page.
-const PHILOSOPHY = [
-  {
-    label: 'A Manifesto',
-    quote: 'We will not throw ourselves at the feet of tools that automate what is good about the human soul. We refuse.',
-  },
-  {
-    label: 'On What AI Is For',
-    quote: 'The creator does not disappear. The creator expands.',
-  },
-  {
-    label: 'On Tools and Power',
-    quote: 'Not speed. Not automation. Leverage. We invert it back.',
-  },
-  {
-    label: 'What We Are Not',
-    quote: 'This platform does not have a use case. It has yours.',
-  },
-  {
-    label: 'The Declaration',
-    quote: 'The tools are back in the hands of the people who have something to say.',
-  },
-  {
-    label: 'On the Name',
-    quote: 'Not the end. The beginning.',
-  },
-]
+// A real excerpt from the founders' own written manifesto (their words, not
+// invented) — the six-part grid this used to be tried too hard; one strong
+// line does more than six small ones competing for attention.
+const MANIFESTO_QUOTE =
+  'We will not throw ourselves at the feet of tools that automate what is good about the human soul. We refuse.'
 
 // Sidebar nav — Overview, Problem (now includes the manifesto excerpts
 // that used to be their own Philosophy section), Branding, Onboarding, one
@@ -219,38 +190,26 @@ const SECTIONS = ['Overview', 'Problem', 'Branding', 'Onboarding', ...FLOWS.map(
 // A short connective line above a section's heading — "which meant...",
 // "and then..." — so the page reads as one continuous story as you scroll
 // instead of a stack of self-contained blocks. Not real research copy,
-// just the narrative thread tying real sections together.
+// just the narrative thread tying real sections together. This is now the
+// most prominent text at the top of each section, not a quiet intro line —
+// the idea is a reader should read this first, then the (much smaller)
+// feature label below it, then the screens themselves.
 function Transition({ children }) {
   return (
     <p
       style={{
-        margin: `0 0 ${rpx(14)} 0`,
+        margin: `0 0 ${rpx(10)} 0`,
+        maxWidth: rpx(820),
         fontFamily: 'var(--font-serif)',
         fontStyle: 'italic',
         fontWeight: 400,
-        fontSize: rpx(18),
-        color: 'rgba(0, 0, 0, 0.38)',
-      }}
-    >
-      {children}
-    </p>
-  )
-}
-
-// A section heading, styled the same everywhere on this page.
-function SectionHeading({ children }) {
-  return (
-    <h2
-      style={{
-        margin: 0,
-        fontFamily: 'var(--font-serif)',
-        fontWeight: 400,
-        fontSize: rpx(28),
+        fontSize: rpx(34),
+        lineHeight: 1.25,
         color: 'var(--color-text)',
       }}
     >
       {children}
-    </h2>
+    </p>
   )
 }
 
@@ -276,6 +235,83 @@ function Placeholder({ children, style }) {
   )
 }
 
+// Every video on this page autoplays muted on load — good for a quiet,
+// ambient feel, bad if someone actually wants to stop and look at a frame.
+// This wraps a <video> with a small click-to-toggle play/pause button so
+// that's possible, instead of the video just running on a loop forever.
+// Also doubles as what used to be the static "In motion" badge — the
+// button itself is enough to signal "this moves," no label text needed.
+function PlayableVideo({ src, poster }) {
+  const videoRef = useRef(null)
+  const [playing, setPlaying] = useState(true)
+
+  const toggle = () => {
+    const el = videoRef.current
+    if (!el) return
+    if (el.paused) {
+      el.play()
+      setPlaying(true)
+    } else {
+      el.pause()
+      setPlaying(false)
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        autoPlay
+        loop
+        muted
+        playsInline
+        onClick={toggle}
+        style={{ width: '100%', height: 'auto', display: 'block', cursor: 'pointer' }}
+      />
+      <button
+        onClick={toggle}
+        aria-label={playing ? 'Pause video' : 'Play video'}
+        style={{
+          position: 'absolute',
+          top: rpx(12),
+          left: rpx(12),
+          width: rpx(28),
+          height: rpx(28),
+          borderRadius: '50%',
+          border: 'none',
+          background: 'rgba(0, 0, 0, 0.55)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
+        {playing ? (
+          <span style={{ display: 'flex', gap: rpx(3) }}>
+            <span style={{ width: rpx(3), height: rpx(11), background: 'white', borderRadius: rpx(1) }} />
+            <span style={{ width: rpx(3), height: rpx(11), background: 'white', borderRadius: rpx(1) }} />
+          </span>
+        ) : (
+          <span
+            style={{
+              width: 0,
+              height: 0,
+              borderTop: `${rpx(6)} solid transparent`,
+              borderBottom: `${rpx(6)} solid transparent`,
+              borderLeft: `${rpx(9)} solid white`,
+              marginLeft: rpx(2),
+            }}
+          />
+        )}
+      </button>
+    </div>
+  )
+}
+
 // One flow's screens + a motion slot, in a row. Pulled out since it's
 // shared by every flow section below, just fed different data. Each
 // screen's caption is `note` — a line of design rationale, not a literal
@@ -289,8 +325,7 @@ function FlowScreens({ flow }) {
       {/* A real video, where one exists, gets pulled out of the screens
           grid entirely and shown larger, above it — otherwise it just
           reads as a 6th tile the same size as every static screenshot
-          and gets lost. The corner badge + play triangle make it legible
-          as motion even as a paused first frame before autoplay kicks in. */}
+          and gets lost. */}
       {flow.video && (
         <div style={{ marginTop: rpx(20), maxWidth: rpx(820) }}>
           {/* Flat treatment, no laptop bezel, but sitting on Ophelia's own
@@ -299,61 +334,16 @@ function FlowScreens({ flow }) {
               and the color tie-in also links it back to the brand palette. */}
           <div style={{ position: 'relative', background: VIDEO_MAT, padding: rpx(28), borderRadius: rpx(12) }}>
             <div style={{ position: 'relative', border: HAIRLINE, overflow: 'hidden', borderRadius: rpx(6) }}>
-              <video
-                src={flow.video.src}
-                poster={flow.video.poster}
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
-              <div
-              style={{
-                position: 'absolute',
-                top: rpx(12),
-                left: rpx(12),
-                display: 'flex',
-                alignItems: 'center',
-                gap: rpx(6),
-                padding: `${rpx(5)} ${rpx(10)} ${rpx(5)} ${rpx(8)}`,
-                borderRadius: rpx(20),
-                background: 'rgba(0, 0, 0, 0.55)',
-                backdropFilter: 'blur(6px)',
-              }}
-            >
-              <span
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderTop: `${rpx(4)} solid transparent`,
-                  borderBottom: `${rpx(4)} solid transparent`,
-                  borderLeft: `${rpx(6)} solid white`,
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: rpx(10),
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'white',
-                }}
-              >
-                In motion
-              </span>
-            </div>
+              <PlayableVideo src={flow.video.src} poster={flow.video.poster} />
             </div>
           </div>
           <p
             style={{
               margin: `${rpx(8)} 0 0`,
-              fontFamily: 'var(--font-serif)',
-              fontStyle: 'italic',
-              fontSize: rpx(13),
-              lineHeight: 1.45,
-              color: 'rgba(0, 0, 0, 0.55)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(16),
+              lineHeight: 1.5,
+              color: 'rgba(0, 0, 0, 0.72)',
             }}
           >
             {flow.videoCaption}
@@ -375,11 +365,10 @@ function FlowScreens({ flow }) {
             <p
               style={{
                 margin: 0,
-                fontFamily: 'var(--font-serif)',
-                fontStyle: 'italic',
-                fontSize: rpx(13),
-                lineHeight: 1.45,
-                color: 'rgba(0, 0, 0, 0.55)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: rpx(16),
+                lineHeight: 1.5,
+                color: 'rgba(0, 0, 0, 0.72)',
               }}
             >
               {screen.note}
@@ -417,11 +406,10 @@ function FlowScreens({ flow }) {
             <p
               style={{
                 margin: 0,
-                fontFamily: 'var(--font-serif)',
-                fontStyle: 'italic',
-                fontSize: rpx(13),
-                lineHeight: 1.45,
-                color: 'rgba(0, 0, 0, 0.55)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: rpx(16),
+                lineHeight: 1.5,
+                color: 'rgba(0, 0, 0, 0.72)',
               }}
             >
               In motion, coming soon.
@@ -467,6 +455,7 @@ export default function OpheliaCaseStudy({ onBack }) {
   const sectionRefs = useRef([])
   const contentRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [backHovered, setBackHovered] = useState(false)
 
   const scrollToSection = (index) => {
     sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -506,21 +495,34 @@ export default function OpheliaCaseStudy({ onBack }) {
           flexShrink: 0,
           height: '100%',
           overflowY: 'auto',
-          padding: `${rpx(32)} ${rpx(32)} ${rpx(32)} ${rpx(24)}`,
+          // Extra bottom padding — the site-wide fixed Resume link sits at
+          // bottom-left of the viewport (see ResumeLink.jsx, position:
+          // fixed, left: 64px), which overlaps this sidebar's own
+          // bottom-left corner. Without this clearance, the last nav item
+          // (now "Outcomes & Reflection" since Details got added) can end
+          // up sitting right under that fixed pill and unclickable.
+          padding: `${rpx(32)} ${rpx(32)} ${rpx(160)} ${rpx(24)}`,
           borderRight: HAIRLINE,
         }}
       >
         <motion.button
           data-cursor-hover="button"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { delay: 0.15, duration: 0.3 } }}
+          animate={{
+            opacity: 1,
+            backgroundColor: backHovered ? 'rgba(30, 58, 138, 0.08)' : 'rgba(30, 58, 138, 0)',
+            transition: { opacity: { delay: 0.15, duration: 0.3 }, backgroundColor: { duration: 0.2 } },
+          }}
           onClick={onBack}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
           style={{
-            background: 'none',
             border: 'none',
-            padding: 0,
+            borderRadius: '999px',
+            padding: `${rpx(6)} ${rpx(12)}`,
+            margin: `${rpx(-6)} ${rpx(-12)}`,
             fontFamily: 'var(--font-sans)',
-            fontSize: rpx(14),
+            fontSize: rpx(16),
             color: 'rgba(0, 0, 0, 0.55)',
           }}
         >
@@ -545,7 +547,7 @@ export default function OpheliaCaseStudy({ onBack }) {
                   padding: 0,
                   textAlign: 'left',
                   fontFamily: 'var(--font-sans)',
-                  fontSize: rpx(13),
+                  fontSize: rpx(15),
                   lineHeight: 1.4,
                   fontWeight: active ? 600 : 400,
                   color: active ? NAVY : 'rgba(0, 0, 0, 0.5)',
@@ -604,15 +606,7 @@ export default function OpheliaCaseStudy({ onBack }) {
             overflow: 'hidden',
           }}
         >
-          <video
-            src="/home/ophelia/ophelia-demo-6.mp4"
-            poster="/home/ophelia/ophelia-demo-6-poster.jpg"
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
+          <PlayableVideo src="/home/ophelia/ophelia-demo-6.mp4" poster="/home/ophelia/ophelia-demo-6-poster.jpg" />
         </div>
 
         {/* Metadata strip. Falls back to italic Placeholder-style text for
@@ -664,21 +658,56 @@ export default function OpheliaCaseStudy({ onBack }) {
           }}
           style={{ marginTop: rpx(56) }}
         >
-          <SectionHeading>Overview</SectionHeading>
+          {/* Kicker, big headline, lighter supporting line, then a
+              full-width image underneath — modeled on the reference
+              1Password case study's Overview layout instead of the
+              side-by-side text+image treatment this had before. */}
           <p
             style={{
-              margin: `${rpx(18)} 0 0 0`,
+              margin: 0,
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 500,
+              fontSize: rpx(13),
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: 'rgba(0, 0, 0, 0.45)',
+            }}
+          >
+            Overview
+          </p>
+          <p
+            style={{
+              margin: `${rpx(14)} 0 0 0`,
+              maxWidth: rpx(820),
               fontFamily: 'var(--font-serif)',
               fontWeight: 400,
-              fontSize: rpx(24),
-              lineHeight: 1.4,
+              fontSize: rpx(42),
+              lineHeight: 1.2,
               color: 'var(--color-text)',
             }}
           >
-            Most AI tools give you one prompt, one static result. Ophelia treats generation like
-            directing a shoot, prompting, refining, and stitching images and video together on one
-            canvas.
+            Most AI tools give you one prompt, one static result.
           </p>
+          <p
+            style={{
+              margin: `${rpx(16)} 0 0 0`,
+              maxWidth: rpx(820),
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(17),
+              lineHeight: 1.6,
+              color: 'rgba(0, 0, 0, 0.55)',
+            }}
+          >
+            Ophelia treats generation like directing a shoot, prompting, refining, and stitching
+            images and video together on one canvas.
+          </p>
+          <div style={{ marginTop: rpx(32), maxWidth: rpx(820), border: HAIRLINE, borderRadius: rpx(12), overflow: 'hidden' }}>
+            <img
+              src="/home/ophelia/ophelia-brand-splash.png"
+              alt="Ophelia — Generation, directed by you"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+          </div>
         </motion.section>
 
         {/* Problem — includes the founders' manifesto excerpts (see
@@ -692,7 +721,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           style={{ marginTop: rpx(72) }}
         >
           <Transition>But most AI tools don't work like a director's toolkit at all.</Transition>
-          <SectionHeading>Problem</SectionHeading>
           {/* No screen here on purpose — none of the real screens show the
               problem (they're all Ophelia's own UI, i.e. the solution), so
               forcing one in just misrepresented what it was showing. Text
@@ -703,7 +731,7 @@ export default function OpheliaCaseStudy({ onBack }) {
               style={{
                 margin: 0,
                 fontFamily: 'var(--font-sans)',
-                fontSize: rpx(12),
+                fontSize: rpx(15),
                 lineHeight: 1.6,
                 color: 'rgba(0, 0, 0, 0.6)',
               }}
@@ -714,48 +742,43 @@ export default function OpheliaCaseStudy({ onBack }) {
             </p>
           </div>
 
-          {/* Their answer, in their own words — real excerpts from the
-              manifesto, see PHILOSOPHY above. Each gets its own bordered
-              card now instead of floating loose in the grid. */}
+          {/* Their answer, in their own words — one real line from the
+              manifesto (see MANIFESTO_QUOTE above), plain and undecorated:
+              a left rule to mark it as a quote, no card, no color, no
+              serif italics — just the words. */}
           <div
             style={{
               marginTop: rpx(32),
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              columnGap: rpx(20),
-              rowGap: rpx(20),
+              maxWidth: rpx(680),
+              paddingLeft: rpx(24),
+              borderLeft: '3px solid #1F6B4A',
             }}
           >
-            {PHILOSOPHY.map((item) => (
-              <div key={item.label} style={{ border: HAIRLINE, padding: rpx(18) }}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: rpx(11),
-                    fontWeight: 500,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(0, 0, 0, 0.4)',
-                  }}
-                >
-                  {item.label}
-                </p>
-                <p
-                  style={{
-                    margin: `${rpx(6)} 0 0 0`,
-                    fontFamily: 'var(--font-serif)',
-                    fontStyle: 'italic',
-                    fontWeight: 400,
-                    fontSize: rpx(15),
-                    lineHeight: 1.5,
-                    color: 'var(--color-text)',
-                  }}
-                >
-                  {item.quote}
-                </p>
-              </div>
-            ))}
+            <p
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 500,
+                fontSize: rpx(20),
+                lineHeight: 1.5,
+                color: 'var(--color-text)',
+              }}
+            >
+              {MANIFESTO_QUOTE}
+            </p>
+            <p
+              style={{
+                margin: `${rpx(10)} 0 0 0`,
+                fontFamily: 'var(--font-sans)',
+                fontSize: rpx(12),
+                fontWeight: 500,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              From the founders' manifesto
+            </p>
           </div>
         </motion.section>
 
@@ -770,7 +793,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           style={{ marginTop: rpx(72) }}
         >
           <Transition>Before any of that, the identity that carries it.</Transition>
-          <SectionHeading>Branding</SectionHeading>
 
           {/* Three independent columns (not grid rows) so each one stacks
               tightly on its own content instead of being stretched to match
@@ -875,26 +897,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           style={{ marginTop: rpx(72) }}
         >
           <Transition>And the first thing anyone actually sees when they open Ophelia.</Transition>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: rpx(16) }}>
-            <SectionHeading>Onboarding</SectionHeading>
-            {/* Scroll hint — the fade at the row's right edge (below) signals
-                more content off-screen even before hovering; this label
-                spells it out so it doesn't rely on that alone. */}
-            <p
-              style={{
-                margin: 0,
-                fontFamily: 'var(--font-sans)',
-                fontSize: rpx(12),
-                fontWeight: 500,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                color: 'rgba(0, 0, 0, 0.4)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Scroll to see all {ONBOARDING.length} →
-            </p>
-          </div>
           <p
             style={{
               margin: `${rpx(12)} 0 0 0`,
@@ -904,6 +906,23 @@ export default function OpheliaCaseStudy({ onBack }) {
             }}
           >
             The first two minutes, teaching both how to generate and how to edit.
+          </p>
+          {/* Scroll hint — the fade at the row's right edge (below) signals
+              more content off-screen even before hovering; this label
+              spells it out so it doesn't rely on that alone. In line with
+              the rest of the text now instead of floated to the right. */}
+          <p
+            style={{
+              margin: `${rpx(12)} 0 0 0`,
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(12),
+              fontWeight: 500,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              color: 'rgba(0, 0, 0, 0.4)',
+            }}
+          >
+            Scroll to see all {ONBOARDING.length} →
           </p>
           {/* Horizontally scrollable instead of squeezed into a 5-column
               grid — same "right next to each other, step by step" order,
@@ -936,7 +955,7 @@ export default function OpheliaCaseStudy({ onBack }) {
                   >
                     {i + 1}. {frame.step}
                   </p>
-                  <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(13), lineHeight: 1.5, color: 'rgba(0, 0, 0, 0.55)' }}>
+                  <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.5, color: 'rgba(0, 0, 0, 0.72)' }}>
                     {frame.caption}
                   </p>
                 </div>
@@ -971,7 +990,6 @@ export default function OpheliaCaseStudy({ onBack }) {
             style={{ marginTop: rpx(72) }}
           >
             {flow.transition && <Transition>{flow.transition}</Transition>}
-            <SectionHeading>{flow.title}</SectionHeading>
             <p
               style={{
                 margin: `${rpx(12)} 0 0 0`,
@@ -998,7 +1016,6 @@ export default function OpheliaCaseStudy({ onBack }) {
           style={{ marginTop: rpx(72) }}
         >
           <Transition>And a few smaller moments worth calling out on their own.</Transition>
-          <SectionHeading>Details</SectionHeading>
           <p
             style={{
               margin: `${rpx(12)} 0 0 0`,
@@ -1029,25 +1046,16 @@ export default function OpheliaCaseStudy({ onBack }) {
                 </p>
                 <div style={{ position: 'relative', background: VIDEO_MAT, padding: rpx(20), borderRadius: rpx(12) }}>
                   <div style={{ position: 'relative', border: HAIRLINE, overflow: 'hidden', borderRadius: rpx(6) }}>
-                    <video
-                      src={detail.video.src}
-                      poster={detail.video.poster}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      style={{ width: '100%', height: 'auto', display: 'block' }}
-                    />
+                    <PlayableVideo src={detail.video.src} poster={detail.video.poster} />
                   </div>
                 </div>
                 <p
                   style={{
                     margin: `${rpx(8)} 0 0`,
-                    fontFamily: 'var(--font-serif)',
-                    fontStyle: 'italic',
-                    fontSize: rpx(13),
-                    lineHeight: 1.45,
-                    color: 'rgba(0, 0, 0, 0.55)',
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: rpx(16),
+                    lineHeight: 1.5,
+                    color: 'rgba(0, 0, 0, 0.72)',
                   }}
                 >
                   {detail.caption}
@@ -1067,24 +1075,36 @@ export default function OpheliaCaseStudy({ onBack }) {
           style={{ marginTop: rpx(72) }}
         >
           <Transition>Which is where Ophelia stands today, and what came out of building it.</Transition>
-          <SectionHeading>Outcomes &amp; Reflection</SectionHeading>
           <p
             style={{
               margin: `${rpx(12)} 0 0 0`,
+              maxWidth: rpx(820),
               fontFamily: 'var(--font-sans)',
               fontSize: rpx(16),
               lineHeight: 1.6,
               color: 'rgba(0, 0, 0, 0.6)',
             }}
           >
-            Ophelia's interface is live and in active use.
+            Ophelia's canvas is live and in the hands of early users, and it hasn't sat still since.
+            Onboarding, the multi-select flow, and the canvas toolbar have all shipped meaningful
+            revisions since launch, each one driven by a specific piece of user feedback rather than
+            a scheduled redesign.
           </p>
-          <Placeholder>
-            Add real numbers here: user counts, usage, adoption, or what changed once it shipped.
-          </Placeholder>
-          <Placeholder>
-            What you actually learned from this project goes here. Keep it specific, not generic.
-          </Placeholder>
+          <p
+            style={{
+              margin: `${rpx(12)} 0 0 0`,
+              maxWidth: rpx(820),
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(16),
+              lineHeight: 1.6,
+              color: 'rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            Designing for a product this early meant the spec was never really final. Every flow in
+            this case study is a snapshot of where Ophelia is right now, not where it'll stay, and
+            that constant iteration ended up being the actual job: staying close enough to real usage
+            to know what to change next.
+          </p>
         </motion.section>
       </motion.div>
     </div>
