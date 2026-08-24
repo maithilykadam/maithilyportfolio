@@ -54,7 +54,7 @@ export const PROJECTS = [
   {
     id: 'serviceontario-integration',
     label: '03 // ServiceOntario Integration',
-    description: 'Enterprise tools for government services',
+    description: 'An AI tool helping policy advisors write clearer regulation',
     previewColor: '#d8cbe0',
   },
   {

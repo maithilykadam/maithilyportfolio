@@ -4,6 +4,7 @@ import { rpx } from '../../constants/responsive.js'
 import { PROJECTS } from './projects.js'
 import OpheliaCaseStudy from './OpheliaCaseStudy.jsx'
 import BitesizeCaseStudy from './BitesizeCaseStudy.jsx'
+import LiveRegiCaseStudy from './LiveRegiCaseStudy.jsx'
 import PlaceholderCaseStudy from './PlaceholderCaseStudy.jsx'
 
 // Which projects (by id, from projects.js) actually fill the WORK grid,
@@ -27,7 +28,6 @@ const WORK_GRID_IDS = [
 // soon" repeated twice — Orbit gets a space pun off its own name, a nice
 // bit of "in on the joke" personality rather than a generic placeholder.
 const COMING_SOON_LINES = {
-  'serviceontario-integration': 'Still cutting through the red tape ✂️',
   'orbit-mobile-design': 'Still in orbit — hasn’t landed yet 🚀',
 }
 
@@ -58,6 +58,15 @@ const VIDEO_BY_ID = {
     src: '/home/humanesociety/humanesociety-demo.mp4',
     poster: '/home/humanesociety/humanesociety-demo-poster.jpg',
   },
+}
+
+// A still image fallback for projects with no screen-recording demo yet —
+// same cover treatment as the video previews above, just a static frame
+// instead. Live REGi doesn't have a demo clip, so its grid box would
+// otherwise render as an empty dark rectangle now that it's no longer
+// `comingSoon`.
+const IMAGE_BY_ID = {
+  'serviceontario-integration': '/home/ontario/cover.png',
 }
 
 // Data-driven case studies (see PlaceholderCaseStudy.jsx) for projects
@@ -119,6 +128,7 @@ const [LEFT_COLUMN, RIGHT_COLUMN] = chunkIntoColumns(SLOTS, 2)
 // underneath instead of just repeating "coming soon" a second time.
 function PreviewBox({ slot, onOpen }) {
   const video = VIDEO_BY_ID[slot.id]
+  const image = !video && IMAGE_BY_ID[slot.id]
   const disabled = slot.comingSoon
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: rpx(12), width: '94%' }}>
@@ -130,7 +140,7 @@ function PreviewBox({ slot, onOpen }) {
           aspectRatio: '4 / 3',
           cursor: disabled ? 'default' : 'pointer',
           overflow: 'hidden',
-          background: video ? '#000' : disabled ? slot.previewColor ?? '#e8e2d8' : 'rgba(0, 0, 0, 0.25)',
+          background: video ? '#000' : image ? 'rgb(222, 232, 244)' : disabled ? slot.previewColor ?? '#e8e2d8' : 'rgba(0, 0, 0, 0.25)',
         }}
       >
         {video && (
@@ -143,6 +153,9 @@ function PreviewBox({ slot, onOpen }) {
             playsInline
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
+        )}
+        {image && (
+          <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
         )}
         {disabled && (
           <div
@@ -266,10 +279,13 @@ export default function WorkContent() {
   // BitesizeCaseStudy.jsx) instead of the generic data-driven placeholder,
   // same reasoning as Ophelia above.
   const isBitesize = openSlot?.id === 'bitesize'
+  // Live REGi also gets its own bespoke case-study page (see
+  // LiveRegiCaseStudy.jsx) — same reasoning as Ophelia/Bitesize above.
+  const isLiveRegi = openSlot?.id === 'serviceontario-integration'
   // Same full-bleed treatment for any other project with a real (if still
   // partly placeholder) case-study page — see CASE_STUDY_DATA above.
   const placeholderCaseStudy = openSlot ? CASE_STUDY_DATA[openSlot.id] : null
-  const isFullCaseStudy = isOphelia || isBitesize || Boolean(placeholderCaseStudy)
+  const isFullCaseStudy = isOphelia || isBitesize || isLiveRegi || Boolean(placeholderCaseStudy)
 
   return (
     <div
@@ -326,6 +342,20 @@ export default function WorkContent() {
               nextProjectLabel="OMHS"
             />
           </motion.div>
+        ) : isLiveRegi ? (
+          <motion.div
+            key="live-regi"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.3 } }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            style={{ flex: '1 1 auto', minHeight: 0 }}
+          >
+            <LiveRegiCaseStudy
+              onBack={() => navigate('/work')}
+              onNextProject={() => navigate('/work/ophelia-ai-interface')}
+              nextProjectLabel="Ophelia"
+            />
+          </motion.div>
         ) : placeholderCaseStudy ? (
           <motion.div
             key={openSlot.id}
@@ -337,8 +367,8 @@ export default function WorkContent() {
             <PlaceholderCaseStudy
               {...placeholderCaseStudy}
               onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/ophelia-ai-interface')}
-              nextProjectLabel="Ophelia"
+              onNextProject={() => navigate('/work/serviceontario-integration')}
+              nextProjectLabel="Live REGi"
             />
           </motion.div>
         ) : openSlot ? (
