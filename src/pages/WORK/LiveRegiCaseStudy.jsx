@@ -24,82 +24,128 @@ const METADATA = [
   { label: 'Role', value: 'UX Designer' },
   { label: 'Platform', value: 'Web app (desktop + mobile)' },
   { label: 'Timeline', value: '4 months (May–Aug 2026)' },
-  { label: 'Team', value: '2 UX Designers, 2 UX Researchers' },
+  { label: 'Team', value: ['2 UX Designers', '2 UX Researchers'] },
 ]
 
 // Real screens from the desktop "Analyze draft legislation" flow (public/
-// home/ontario/live-regi-desktop), in the order a policy advisor would
-// actually move through them: paste in text, handle an invalid entry,
-// choose what to search for, see results, layer on a second search, then
-// drill into why one specific clause got flagged.
-const DESKTOP_FRAMES = [
+// home/ontario/live-regi-desktop) paired with their mobile counterpart
+// (public/home/ontario/live-regi-mobile), instead of showing the two
+// platforms as separate flows — pairing them makes the desktop-to-mobile
+// correlation visible directly, rather than asking the reader to hold one
+// flow in memory while scrolling through the other. Grouped into the same
+// three beats as before. Mobile's "Layering on a second search" step
+// wasn't captured as its own screen (mobile folds that combined-filter
+// state straight into the rationale view instead), so that one pair is
+// desktop-only — everything else has a real 1:1 match.
+const PAIRED_GROUPS = [
   {
-    src: '/home/ontario/live-regi-desktop/01-new-text-entry.png',
-    label: 'Analyze draft text',
-    note: 'An advisor pastes in one section of a draft regulation at a time, no prompt or comments needed.',
+    heading: 'Getting a draft in',
+    pairs: [
+      {
+        label: 'Analyze draft text',
+        desktop: '/home/ontario/live-regi-desktop/01-new-text-entry.png',
+        mobile: '/home/ontario/live-regi-mobile/01-new-text-entry.png',
+        note: 'An advisor pastes in one section of a draft regulation at a time, no prompt or comments needed, same entry point on both.',
+      },
+      {
+        label: 'Handling invalid input',
+        desktop: '/home/ontario/live-regi-desktop/02-invalid-text-entry.png',
+        mobile: '/home/ontario/live-regi-mobile/02-invalid-text-entry.png',
+        note: "REGi only reads draft legislative text, so conversational input or an unsupported format surfaces exactly what it can't process, the same explicit message on a smaller screen.",
+      },
+    ],
   },
   {
-    src: '/home/ontario/live-regi-desktop/02-invalid-text-entry.png',
-    label: 'Handling invalid input',
-    note: "REGi only reads draft legislative text, so conversational input or an unsupported format surfaces exactly what it can't process yet, instead of a generic error.",
+    heading: 'Searching and reading results',
+    pairs: [
+      {
+        label: 'Choosing what to search for',
+        desktop: '/home/ontario/live-regi-desktop/03-search-options.png',
+        mobile: '/home/ontario/live-regi-mobile/03-search-options.png',
+        note: 'Overly complex language, regulatory compliance requirements, or outdated language. On mobile, the methodology explainer collapses below the fold instead of competing with the three options up top.',
+      },
+      {
+        label: 'Results for one search',
+        desktop: '/home/ontario/live-regi-desktop/04-results-summary.png',
+        mobile: '/home/ontario/live-regi-mobile/04-results-summary.png',
+        note: "Three flagged instances of complex language. Mobile's results also carry each clause's RCR count and match logic inline, detail the desktop crop above doesn't need to surface as directly since the draft panel sits right alongside it.",
+      },
+    ],
   },
   {
-    src: '/home/ontario/live-regi-desktop/03-search-options.png',
-    label: 'Choosing what to search for',
-    note: 'Overly complex language, regulatory compliance requirements, or outdated language, each with a link to how REGi actually finds it.',
-  },
-  {
-    src: '/home/ontario/live-regi-desktop/04-results-summary.png',
-    label: 'Results for one search',
-    note: 'Three flagged instances of complex language, with the original submitted draft still visible on the right for reference.',
-  },
-  {
-    src: '/home/ontario/live-regi-desktop/05-clause-selection.png',
-    label: 'Layering on a second search',
-    note: 'Regulatory compliance requirements added alongside complex language, checkboxes controlling which results actually show.',
-  },
-  {
-    src: '/home/ontario/live-regi-desktop/06-clause-selected.png',
-    label: 'Why a clause was flagged',
-    note: "Opening a result expands REGi's rationale and highlights the exact matching text back in the submitted draft, so the flag never loses its source.",
+    heading: 'Going deeper on a result',
+    pairs: [
+      {
+        label: 'Layering on a second search',
+        desktop: '/home/ontario/live-regi-desktop/05-clause-selection.png',
+        mobile: null,
+        note: 'Regulatory compliance requirements added alongside complex language, checkboxes controlling which results actually show. Desktop-only screen, mobile folds this straight into the rationale view below.',
+      },
+      {
+        label: 'Why a clause was flagged',
+        desktop: '/home/ontario/live-regi-desktop/06-clause-selected.png',
+        mobile: '/home/ontario/live-regi-mobile/05-clause-selected.png',
+        note: "Opening a result expands REGi's rationale and highlights the exact matching text back in the submitted draft, so the flag never loses its source, on either platform.",
+      },
+    ],
   },
 ]
 
-// Real screens from the same flow, adapted for a single-column mobile
-// layout (public/home/ontario/live-regi-mobile). The results view here
-// carries extra detail the desktop crop didn't show: each flagged clause
-// tagged with its own RCR count and match logic (single clause, multiple
-// clauses, AND/OR), not just a category label.
-const MOBILE_FRAMES = [
+// Real screens from the desktop tutorial mode (public/home/ontario/
+// live-regi-tutorial) — coach marks walking a first-time user through the
+// same Analyze flow above, screenshotted mid-tutorial so the marks
+// themselves are visible. Grouped the same way as the desktop flow above,
+// two per beat, so the coach-mark text is actually legible.
+const TUTORIAL_GROUPS = [
   {
-    src: '/home/ontario/live-regi-mobile/01-new-text-entry.png',
-    label: 'Analyze draft text',
-    note: 'Same entry point, stacked into one column instead of splitting the draft into a side panel.',
+    heading: 'Opting in and getting oriented',
+    frames: [
+      {
+        src: '/home/ontario/live-regi-tutorial/01-quick-overview-prompt.png',
+        label: 'Opting in',
+        note: 'A first-time user gets asked before anything starts: walk through it, or skip straight to using it.',
+      },
+      {
+        src: '/home/ontario/live-regi-tutorial/02-getting-oriented.png',
+        label: 'Getting oriented',
+        note: 'Coach marks call out the search options, the help button, and the draft-preview toggle before any results exist yet.',
+      },
+    ],
   },
   {
-    src: '/home/ontario/live-regi-mobile/02-invalid-text-entry.png',
-    label: 'Handling invalid input',
-    note: 'The same explicit "here\'s what I can\'t process" message, not shortened just because the screen is smaller.',
+    heading: 'Reading and reviewing',
+    frames: [
+      {
+        src: '/home/ontario/live-regi-tutorial/03-reading-results.png',
+        label: 'Reading results',
+        note: 'Once results appear, the tutorial breaks down what the summary counts mean and what each flagged result actually contains.',
+      },
+      {
+        src: '/home/ontario/live-regi-tutorial/04-viewing-rationale.png',
+        label: 'Opening a rationale',
+        note: 'Selecting a result does two things at once: expands why it was flagged, and highlights that exact spot in the submitted draft.',
+      },
+    ],
   },
   {
-    src: '/home/ontario/live-regi-mobile/03-search-options.png',
-    label: 'Choosing what to search for',
-    note: 'The methodology explainer collapses below the fold instead of competing with the three search options up top.',
-  },
-  {
-    src: '/home/ontario/live-regi-mobile/04-results-summary.png',
-    label: 'Results, fully tagged',
-    note: "Each result carries its own RCR count and match type, single clause, multiple clauses, AND or OR, so nothing gets lost moving between search types.",
-  },
-  {
-    src: '/home/ontario/live-regi-mobile/05-clause-selected.png',
-    label: 'Why a clause was flagged',
-    note: 'The rationale expands in place, same as desktop, without needing a second panel to hold the source text.',
+    heading: 'Going further',
+    frames: [
+      {
+        src: '/home/ontario/live-regi-tutorial/05-combining-searches.png',
+        label: 'Combining searches',
+        note: 'Checking more than one search type filters down to clauses matching any of them, sorted by whichever type was picked last.',
+      },
+      {
+        src: '/home/ontario/live-regi-tutorial/06-alternative-text.png',
+        label: 'Suggesting a rewrite',
+        note: "REGi doesn't stop at flagging a clause, it proposes specific replacement text alongside the rationale.",
+      },
+    ],
   },
 ]
 
 // Sidebar nav data — a flat list of clickable items, except "Flows" which
-// groups the two flow sections as indented children. `index` still lines
+// groups the three flow sections as indented children. `index` still lines
 // up 1:1 with each section's real position in the page (and its
 // sectionRefs slot).
 const NAV_ITEMS = [
@@ -109,8 +155,8 @@ const NAV_ITEMS = [
     label: 'Flows',
     index: 2,
     children: [
-      { label: 'Desktop', index: 2 },
-      { label: 'Mobile', index: 3 },
+      { label: 'Desktop & Mobile', index: 2 },
+      { label: 'Tutorial Mode', index: 3 },
     ],
   },
   { label: 'Design Considerations', index: 4 },
@@ -212,16 +258,37 @@ function Lightbox({ image, onClose }) {
 // that clicking did anything, so this adds a dark hover tint plus a small
 // magnifying-glass badge that fades in on hover, then opens the Lightbox
 // on click.
-function ClickableImage({ src, alt, onClick }) {
+//
+// `maxHeight`, when passed, caps the thumbnail at that height rather than
+// forcing every image to exactly that height. A screenshot shorter than the
+// cap renders at its own natural size, no stretching, no dead space; only a
+// screenshot taller than the cap (a long scrolled results list, say) gets
+// clipped at the bottom via the wrapper's overflow: hidden. Nothing is
+// actually lost by that clip: the Lightbox this opens into always shows the
+// complete, uncropped screenshot.
+function ClickableImage({ src, alt, onClick, maxHeight }) {
   const [hovered, setHovered] = useState(false)
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
-      style={{ position: 'relative', cursor: 'zoom-in' }}
+      style={{
+        position: 'relative',
+        cursor: 'zoom-in',
+        maxHeight,
+        overflow: maxHeight ? 'hidden' : undefined,
+      }}
     >
-      <img src={src} alt={alt} style={{ width: '100%', height: 'auto', display: 'block' }} />
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          width: '100%',
+          height: 'auto',
+          display: 'block',
+        }}
+      />
       <div
         style={{
           position: 'absolute',
@@ -258,65 +325,152 @@ function ClickableImage({ src, alt, onClick }) {
   )
 }
 
-// A horizontally scrollable row of real screens — same pattern as every
-// other case study's Filmstrip: each screenshot shown full size instead of
-// shrunk to fit a grid, with a numbered label and a line of rationale
-// underneath, and a fade over the row's right edge signaling there's more
-// to scroll to.
-function Filmstrip({ frames, onImageClick }) {
+// Dense, text-heavy desktop screens (tutorial mode here) don't hold up
+// shrunk into a narrow scrolling filmstrip — the coach-mark copy just isn't
+// readable. This breaks a flow into a few small named beats (see
+// TUTORIAL_GROUPS) and lays out each beat's screens two at a time, wrapping
+// to a single column on narrower viewports instead of scrolling. Numbering
+// carries on across every group instead of resetting to 1 each time, so it
+// still reads as one continuous flow, just broken into readable chunks.
+function ScreenFlow({ groups, onImageClick }) {
+  let count = 0
   return (
     <>
-      <p
-        style={{
-          margin: `${rpx(12)} 0 0 0`,
-          fontFamily: 'var(--font-sans)',
-          fontSize: rpx(12),
-          fontWeight: 500,
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-          color: 'rgba(0, 0, 0, 0.4)',
-        }}
-      >
-        Scroll to see all {frames.length} →
-      </p>
-      <div style={{ marginTop: rpx(20), position: 'relative' }}>
-        <div style={{ display: 'flex', gap: rpx(20), overflowX: 'auto', paddingBottom: rpx(12) }}>
-          {frames.map((frame, i) => (
-            <div key={frame.label} style={{ display: 'flex', flexDirection: 'column', gap: rpx(8), width: rpx(260), flexShrink: 0 }}>
-              <div style={{ border: HAIRLINE, borderRadius: rpx(10), overflow: 'hidden' }}>
-                <ClickableImage src={frame.src} alt={frame.label} onClick={() => onImageClick?.({ src: frame.src, alt: frame.label })} />
-              </div>
-              <p
-                style={{
-                  margin: 0,
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: rpx(12),
-                  fontWeight: 500,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(0, 0, 0, 0.4)',
-                }}
-              >
-                {i + 1}. {frame.label}
-              </p>
-              <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(15), lineHeight: 1.5, color: 'rgba(0, 0, 0, 0.72)' }}>
-                {frame.note}
-              </p>
-            </div>
-          ))}
+      {groups.map((group) => (
+        <div key={group.heading} style={{ marginTop: rpx(28) }}>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(13),
+              fontWeight: 600,
+              color: 'var(--color-text)',
+            }}
+          >
+            {group.heading}
+          </p>
+          <div style={{ marginTop: rpx(14), display: 'flex', alignItems: 'flex-start', gap: rpx(24), flexWrap: 'wrap' }}>
+            {group.frames.map((frame) => {
+              count += 1
+              const n = count
+              return (
+                <div key={frame.label} style={{ flex: '1 1 420px', minWidth: rpx(360), display: 'flex', flexDirection: 'column', gap: rpx(10) }}>
+                  <div style={{ border: HAIRLINE, borderRadius: rpx(10), overflow: 'hidden' }}>
+                    <ClickableImage
+                      src={frame.src}
+                      alt={frame.label}
+                      maxHeight={rpx(560)}
+                      onClick={() => onImageClick?.({ src: frame.src, alt: frame.label })}
+                    />
+                  </div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: rpx(12),
+                      fontWeight: 500,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(0, 0, 0, 0.4)',
+                    }}
+                  >
+                    {n}. {frame.label}
+                  </p>
+                  <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(15), lineHeight: 1.5, color: 'rgba(0, 0, 0, 0.72)' }}>
+                    {frame.note}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
         </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: rpx(12),
-            width: rpx(60),
-            background: 'linear-gradient(to right, rgba(235, 241, 246, 0), rgba(235, 241, 246, 1))',
-            pointerEvents: 'none',
-          }}
-        />
-      </div>
+      ))}
+    </>
+  )
+}
+
+// Desktop and mobile shown side by side per step instead of as two separate
+// flows — pairing them makes the responsive correlation visible directly.
+// Each pair is its own row, so a tall mobile screenshot next to a wide
+// desktop one just looks like two different devices (which they are)
+// instead of competing for a uniform height against unrelated screens in a
+// long multi-item row. `mobile` is optional — the one desktop-only step
+// (see PAIRED_GROUPS) just renders without a second column.
+function PairedFlow({ groups, onImageClick }) {
+  let count = 0
+  return (
+    <>
+      {groups.map((group) => (
+        <div key={group.heading} style={{ marginTop: rpx(32) }}>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(13),
+              fontWeight: 600,
+              color: 'var(--color-text)',
+            }}
+          >
+            {group.heading}
+          </p>
+          <div style={{ marginTop: rpx(16), display: 'flex', flexDirection: 'column', gap: rpx(28) }}>
+            {group.pairs.map((pair) => {
+              count += 1
+              const n = count
+              return (
+                <div key={pair.label}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: rpx(12),
+                      fontWeight: 500,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(0, 0, 0, 0.4)',
+                    }}
+                  >
+                    {n}. {pair.label}
+                  </p>
+                  <div style={{ marginTop: rpx(10), display: 'flex', alignItems: 'flex-start', gap: rpx(20) }}>
+                    <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                      <p style={{ margin: `0 0 ${rpx(6)} 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(11), fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.3)' }}>
+                        Desktop
+                      </p>
+                      <div style={{ border: HAIRLINE, borderRadius: rpx(10), overflow: 'hidden' }}>
+                        <ClickableImage
+                          src={pair.desktop}
+                          alt={`${pair.label} (desktop)`}
+                          maxHeight={rpx(560)}
+                          onClick={() => onImageClick?.({ src: pair.desktop, alt: `${pair.label} (desktop)` })}
+                        />
+                      </div>
+                    </div>
+                    {pair.mobile && (
+                      <div style={{ width: rpx(220), flexShrink: 0 }}>
+                        <p style={{ margin: `0 0 ${rpx(6)} 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(11), fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.3)' }}>
+                          Mobile
+                        </p>
+                        <div style={{ border: HAIRLINE, borderRadius: rpx(10), overflow: 'hidden' }}>
+                          <ClickableImage
+                            src={pair.mobile}
+                            alt={`${pair.label} (mobile)`}
+                            maxHeight={rpx(560)}
+                            onClick={() => onImageClick?.({ src: pair.mobile, alt: `${pair.label} (mobile)` })}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <p style={{ margin: `${rpx(10)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(15), lineHeight: 1.5, color: 'rgba(0, 0, 0, 0.72)' }}>
+                    {pair.note}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </>
   )
 }
@@ -510,36 +664,53 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
           />
         </div>
 
-        {/* Metadata strip */}
+        {/* Metadata strip — a fixed grid of equal-width columns (not
+            flex+space-between, which let a long value's column crowd its
+            neighbors) so every label gets consistent room. A value can be
+            an array (see Team above) to stack as separate lines instead of
+            one run-on line, same idea as a real resume's metadata block. */}
         <div
           style={{
             marginTop: rpx(28),
             maxWidth: rpx(760),
-            display: 'flex',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            columnGap: rpx(32),
+            rowGap: rpx(20),
             padding: `${rpx(26)} 0`,
             borderTop: HAIRLINE,
             borderBottom: HAIRLINE,
           }}
         >
-          {METADATA.map(({ label, value }) => (
-            <div key={label}>
-              <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(14), fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.4)' }}>
-                {label}
-              </p>
-              <p
-                style={{
-                  margin: `${rpx(10)} 0 0 0`,
-                  fontFamily: 'var(--font-sans)',
-                  fontStyle: value ? 'normal' : 'italic',
-                  fontSize: rpx(16),
-                  color: value ? 'var(--color-text)' : 'rgba(0, 0, 0, 0.4)',
-                }}
-              >
-                {value ?? 'Add this'}
-              </p>
-            </div>
-          ))}
+          {METADATA.map(({ label, value }) => {
+            const lines = Array.isArray(value) ? value : value ? [value] : null
+            return (
+              <div key={label}>
+                <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(14), fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.4)' }}>
+                  {label}
+                </p>
+                {lines ? (
+                  lines.map((line, i) => (
+                    <p
+                      key={i}
+                      style={{
+                        margin: `${i === 0 ? rpx(10) : rpx(4)} 0 0 0`,
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: rpx(16),
+                        color: 'var(--color-text)',
+                      }}
+                    >
+                      {line}
+                    </p>
+                  ))
+                ) : (
+                  <p style={{ margin: `${rpx(10)} 0 0 0`, fontFamily: 'var(--font-sans)', fontStyle: 'italic', fontSize: rpx(16), color: 'rgba(0, 0, 0, 0.4)' }}>
+                    Add this
+                  </p>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         {/* Overview */}
@@ -587,7 +758,10 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
           </p>
         </motion.section>
 
-        {/* Desktop flow */}
+        {/* Desktop & Mobile — paired step by step instead of shown as two
+            separate flows, so the responsive correlation is visible
+            directly rather than something to hold in memory across two
+            scrolls. */}
         <motion.section
           {...REVEAL}
           ref={(el) => {
@@ -595,15 +769,20 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
           }}
           style={{ marginTop: rpx(72) }}
         >
-          <Transition>Starting on desktop, where most policy work actually happens.</Transition>
-          <p style={{ margin: `${rpx(12)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(16), color: 'rgba(0, 0, 0, 0.6)' }}>
+          <Transition>Walking through it on desktop and mobile side by side.</Transition>
+          <p style={{ margin: `${rpx(12)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(16), color: 'rgba(0, 0, 0, 0.6)' }}>
             An advisor pastes in draft text, picks what to search for, and can layer on a second search or
-            drill into any flagged clause to see exactly why REGi caught it.
+            drill into any flagged clause to see exactly why REGi caught it. Broken into three smaller beats
+            below rather than one long scroll, each step shown on both platforms at once.
           </p>
-          <Filmstrip frames={DESKTOP_FRAMES} onImageClick={setLightbox} />
+          <div style={{ maxWidth: rpx(1040) }}>
+            <PairedFlow groups={PAIRED_GROUPS} onImageClick={setLightbox} />
+          </div>
         </motion.section>
 
-        {/* Mobile flow */}
+        {/* Tutorial Mode — same desktop flow, walked through with coach
+            marks for a first-time user, screenshotted mid-tutorial so the
+            marks themselves are visible. */}
         <motion.section
           {...REVEAL}
           ref={(el) => {
@@ -611,12 +790,14 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
           }}
           style={{ marginTop: rpx(72) }}
         >
-          <Transition>The same tool, built to hold up on a smaller screen too.</Transition>
-          <p style={{ margin: `${rpx(12)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(16), color: 'rgba(0, 0, 0, 0.6)' }}>
-            Everything from desktop carries over, stacked into one column instead of a split view, with
-            nothing shortened or hidden to make it fit.
+          <Transition>And for someone using it for the first time, a guided version of that same flow.</Transition>
+          <p style={{ margin: `${rpx(12)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(16), color: 'rgba(0, 0, 0, 0.6)' }}>
+            Tutorial mode is opt-in, not forced. Coach marks call out each part of the interface as it
+            appears, rather than front-loading everything before there's anything on screen to point at.
           </p>
-          <Filmstrip frames={MOBILE_FRAMES} onImageClick={setLightbox} />
+          <div style={{ maxWidth: rpx(1040) }}>
+            <ScreenFlow groups={TUTORIAL_GROUPS} onImageClick={setLightbox} />
+          </div>
         </motion.section>
 
         {/* Design Considerations */}
@@ -629,6 +810,38 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
         >
           <Transition>A few decisions here were about trust as much as usability.</Transition>
           <p style={{ margin: `${rpx(12)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.6)' }}>
+            <strong style={{ fontWeight: 600, color: 'var(--color-text)' }}>Working within a design system.</strong>{' '}
+            Ontario's public-facing government sites follow the Ontario Design System closely. Live REGi is
+            an internal tool rather than a public-facing service, so as a team we had more room to bring our
+            own visual flair to it than a fully public gov page would allow.
+          </p>
+
+          {/* Accessibility gets its own callout rather than sitting as just
+              another paragraph in the list — it's the one place the leeway
+              above explicitly didn't apply, so it gets the visual weight to
+              match. */}
+          <div
+            style={{
+              marginTop: rpx(20),
+              maxWidth: rpx(820),
+              background: SCREEN_MAT,
+              padding: rpx(24),
+              borderRadius: rpx(12),
+            }}
+          >
+            <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: rpx(18), color: 'var(--color-text)' }}>
+              Accessibility, held to the same bar regardless.
+            </p>
+            <p style={{ margin: `${rpx(10)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.65)' }}>
+              The Ontario Design System follows accessibility and screen reader support to the letter, and
+              the leeway we had elsewhere didn't extend to lowering that bar. Every screen, tutorial mode
+              included, still had to meet AODA accessibility requirements: proper contrast, full keyboard
+              navigation, and a screen reader experience that actually holds up, the same as any public
+              Ontario government service.
+            </p>
+          </div>
+
+          <p style={{ margin: `${rpx(20)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.6)' }}>
             <strong style={{ fontWeight: 600, color: 'var(--color-text)' }}>Explainability.</strong> Every
             flagged clause can expand into a plain-language rationale, and highlights back to the exact spot
             in the submitted draft. An advisor should never have to just take REGi's word for it.
@@ -637,11 +850,6 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
             <strong style={{ fontWeight: 600, color: 'var(--color-text)' }}>Honest limits.</strong> Instead
             of a generic error, an unsupported input lists exactly what REGi can't process yet, formats,
             length, uploaded documents, so the advisor knows it's a limitation, not a bug.
-          </p>
-          <p style={{ margin: `${rpx(16)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.6)' }}>
-            <strong style={{ fontWeight: 600, color: 'var(--color-text)' }}>Accessibility.</strong> As an
-            Ontario government product, the interface has to meet AODA accessibility standards, not as an
-            afterthought but as a baseline every screen gets built to.
           </p>
         </motion.section>
 
@@ -691,8 +899,8 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
               What's coming next on this page
             </p>
             <p style={{ margin: `${rpx(10)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.6)' }}>
-              Live REGi's tutorial mode, which walks new users through each step on desktop, plus a closer
-              look at the usability testing synthesis itself once those visuals are ready to share.
+              A closer look at the usability testing synthesis itself, once those visuals are ready to
+              share.
             </p>
           </div>
         </motion.section>

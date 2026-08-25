@@ -20,7 +20,7 @@ export const PROJECTS = [
   {
     id: 'bitesize',
     label: '01 // Bitesize',
-    description: null,
+    description: "An app built for ADHD'ers, by ADHD'ers",
     previewColor: '#dce8d0',
   },
   {

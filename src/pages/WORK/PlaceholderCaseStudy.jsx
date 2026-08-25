@@ -175,47 +175,64 @@ export default function PlaceholderCaseStudy({
             equally finished. Only rendered once real Role/Timeline/Team
             values exist for a project (see `metadata` prop, passed in from
             WorkContent.jsx's CASE_STUDY_DATA) rather than always showing a
-            row of "Add this" placeholders. */}
+            row of "Add this" placeholders. A fixed grid of equal-width
+            columns (not flex+space-between, which let a long value's
+            column crowd its neighbors) so every label gets consistent
+            room — a value can be an array to stack as separate lines
+            instead of one run-on line. */}
         {metadata.length > 0 && (
           <div
             style={{
               marginTop: rpx(28),
               maxWidth: rpx(760),
-              display: 'flex',
-              justifyContent: 'space-between',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              columnGap: rpx(32),
+              rowGap: rpx(20),
               padding: `${rpx(26)} 0`,
               borderTop: '1px solid rgba(0, 0, 0, 0.1)',
               borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
             }}
           >
-            {metadata.map(({ label, value }) => (
-              <div key={label}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: rpx(14),
-                    fontWeight: 500,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(0, 0, 0, 0.4)',
-                  }}
-                >
-                  {label}
-                </p>
-                <p
-                  style={{
-                    margin: `${rpx(10)} 0 0 0`,
-                    fontFamily: 'var(--font-sans)',
-                    fontStyle: value ? 'normal' : 'italic',
-                    fontSize: rpx(16),
-                    color: value ? 'var(--color-text)' : 'rgba(0, 0, 0, 0.4)',
-                  }}
-                >
-                  {value ?? 'Add this'}
-                </p>
-              </div>
-            ))}
+            {metadata.map(({ label, value }) => {
+              const lines = Array.isArray(value) ? value : value ? [value] : null
+              return (
+                <div key={label}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: rpx(14),
+                      fontWeight: 500,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(0, 0, 0, 0.4)',
+                    }}
+                  >
+                    {label}
+                  </p>
+                  {lines ? (
+                    lines.map((line, i) => (
+                      <p
+                        key={i}
+                        style={{
+                          margin: `${i === 0 ? rpx(10) : rpx(4)} 0 0 0`,
+                          fontFamily: 'var(--font-sans)',
+                          fontSize: rpx(16),
+                          color: 'var(--color-text)',
+                        }}
+                      >
+                        {line}
+                      </p>
+                    ))
+                  ) : (
+                    <p style={{ margin: `${rpx(10)} 0 0 0`, fontFamily: 'var(--font-sans)', fontStyle: 'italic', fontSize: rpx(16), color: 'rgba(0, 0, 0, 0.4)' }}>
+                      Add this
+                    </p>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
 

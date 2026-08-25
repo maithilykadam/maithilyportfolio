@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
 import { PLAYGROUND_ITEMS } from './playgroundItems.js'
@@ -263,6 +264,7 @@ const RIGHT_COLUMNS = [
 
 export default function PlayContent() {
   const [openItem, setOpenItem] = useState(null)
+  const navigate = useNavigate()
 
   return (
     <div style={{ padding: `${rpx(24)} ${rpx(64)} ${rpx(64)}` }}>
@@ -305,6 +307,29 @@ export default function PlayContent() {
       >
         more pieces coming soon
       </p>
+
+      {/* A way back to the case studies from the bottom of a page that's
+          otherwise all side-project work — same understated text-link
+          treatment as "view more projects →" on the home page (see
+          WorkHomeContent.jsx) rather than a heavier button, since this is
+          just a pointer, not the main action on this page. */}
+      <motion.button
+        data-cursor-hover="button"
+        onClick={() => navigate('/work')}
+        style={{
+          display: 'block',
+          margin: `${rpx(12)} 0 0 0`,
+          padding: 0,
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-sans)',
+          fontSize: rpx(15),
+          color: 'rgba(0, 0, 0, 0.55)',
+        }}
+      >
+        wanna see more? check out my case studies →
+      </motion.button>
 
       <AnimatePresence>
         {openItem && <PlaygroundLightbox item={openItem} onClose={() => setOpenItem(null)} />}

@@ -4,6 +4,7 @@ import { motion, useMotionValue, useSpring } from 'framer-motion'
 
 const DOT_SIZE = 12
 const RING_SIZE_BUTTON = 20
+const RING_SIZE_INVERT = 24
 const BADGE_SIZE = 32
 const NAVY = '#1e3a8a'
 
@@ -39,6 +40,7 @@ const DOT_VARIANTS = {
   ring: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
   button: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
   expand: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
+  invert: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
 }
 
 const RING_VARIANTS = {
@@ -51,6 +53,17 @@ const RING_VARIANTS = {
     opacity: 1,
     backgroundColor: 'rgba(30, 58, 138, 0.1)',
     border: '1px solid rgba(30, 58, 138, 0.5)',
+  },
+  // Any image/video/colored preview — not one of the more specific states
+  // above — gets a plain white circle with a navy stroke instead of the
+  // solid navy dot, so the cursor stays visible over busy or dark imagery
+  // instead of disappearing into it.
+  invert: {
+    width: RING_SIZE_INVERT,
+    height: RING_SIZE_INVERT,
+    opacity: 1,
+    backgroundColor: '#ffffff',
+    border: `1.5px solid ${NAVY}`,
   },
 }
 
@@ -118,10 +131,17 @@ export default function CustomCursor() {
       if (target) {
         setVariant(target.getAttribute('data-cursor-hover'))
         setLabel(target.getAttribute('data-cursor-label') ?? 'VIEW CASE STUDY')
+        return
       }
+      // No explicit data-cursor-hover state on anything up the tree — but
+      // an <img>/<video> is never just the page's own flat background
+      // color, so it still gets its own state (see `invert` above) instead
+      // of leaving the plain dot to run straight over screenshots, hero
+      // clips, gallery pieces, etc. site-wide.
+      if (e.target.closest?.('img, video')) setVariant('invert')
     }
     const handleOut = (e) => {
-      if (e.target.closest?.('[data-cursor-hover]')) setVariant('default')
+      if (e.target.closest?.('[data-cursor-hover]') || e.target.closest?.('img, video')) setVariant('default')
     }
     window.addEventListener('mousemove', handleMove)
     window.addEventListener('mouseover', handleOver)

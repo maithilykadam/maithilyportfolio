@@ -24,7 +24,11 @@ import { rpx } from '../../constants/responsive.js'
 // for legibility. The box itself becomes `flex: 1 1 auto` inside a
 // column instead of filling the whole grid cell, so the caption gets its
 // own real space rather than overlapping.
-function PlaceholderBox({ area, onClick, video, title }) {
+//
+// `image` is a still-frame fallback for a project with no screen-recording
+// demo yet (Live REGi) — same cover treatment as `video`, just a static
+// image instead. Only one of `video`/`image` is expected per box.
+function PlaceholderBox({ area, onClick, video, image, title }) {
   const [hovered, setHovered] = useState(false)
   return (
     <motion.div
@@ -43,7 +47,7 @@ function PlaceholderBox({ area, onClick, video, title }) {
           flex: '1 1 auto',
           minHeight: 0,
           overflow: 'hidden',
-          background: video ? '#000' : 'rgba(0, 0, 0, 0.25)',
+          background: video ? '#000' : image ? 'rgb(222, 232, 244)' : 'rgba(0, 0, 0, 0.25)',
           opacity: hovered ? 0.85 : 1,
           transition: 'opacity 0.2s ease-out',
           cursor: 'pointer',
@@ -60,6 +64,7 @@ function PlaceholderBox({ area, onClick, video, title }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         )}
+        {image && <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />}
       </div>
       {title && (
         <p
@@ -98,11 +103,13 @@ function PlaceholderBox({ area, onClick, video, title }) {
  * mechanism needed. Each box still jumps to the full WORK page on click.
  *
  * `onNavigate` — go to the WORK grid (used by the "view more projects"
- * link). `onNavigateToOphelia` / `onNavigateToOMHS` / `onNavigateToBitesize`
+ * link). `onNavigateToOphelia` / `onNavigateToLiveRegi` / `onNavigateToBitesize`
  * — go straight into that project's case study instead of the grid, wired
- * to the Ophelia, OMHS, and Bitesize boxes specifically.
+ * to the Ophelia, Live REGi, and Bitesize boxes specifically. Live REGi
+ * replaced OMHS in this rotation of 3 (OMHS's own case study is still up
+ * on the full WORK grid, just not one of the 3 featured here).
  */
-export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToOMHS, onNavigateToBitesize }) {
+export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToLiveRegi, onNavigateToBitesize }) {
   return (
     <>
       {/* "WORK" label removed — the top nav (now living at the top of the
@@ -156,14 +163,18 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNav
           video={{ src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' }}
           title="Ophelia AI Interface"
         />
-        <PlaceholderBox
-          area="bottomLeft"
-          onClick={onNavigateToOMHS}
-          video={{ src: '/home/humanesociety/humanesociety-demo.mp4', poster: '/home/humanesociety/humanesociety-demo-poster.jpg' }}
-          title="OMHS"
-        />
+        {/* REGi sits in "bottomRight" (the wider 1.4fr column) rather than
+            "bottomLeft" — its recording is noticeably wider than the other
+            projects' demo clips, so it gets the wider of the two bottom
+            boxes instead of getting cropped tighter to fit the narrow one. */}
         <PlaceholderBox
           area="bottomRight"
+          onClick={onNavigateToLiveRegi}
+          video={{ src: '/home/ontario/live-regi-demo.mp4', poster: '/home/ontario/live-regi-demo-poster.jpg' }}
+          title="REGi Internal Tool"
+        />
+        <PlaceholderBox
+          area="bottomLeft"
           onClick={onNavigateToBitesize}
           video={{ src: '/home/bitesize/bitesize-demo.mp4', poster: '/home/bitesize/bitesize-demo-poster.jpg' }}
           title="Bitesize"

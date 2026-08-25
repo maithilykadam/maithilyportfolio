@@ -58,16 +58,24 @@ const VIDEO_BY_ID = {
     src: '/home/humanesociety/humanesociety-demo.mp4',
     poster: '/home/humanesociety/humanesociety-demo-poster.jpg',
   },
+  // This recording is noticeably wider (~1.95:1) than the shared 4:3 grid
+  // box, so rather than letterbox it (`contain`) or crop its sides off
+  // (`cover` in a too-narrow box), its box gets its own wider aspectRatio
+  // below — matching the video's real proportions closely enough that
+  // `cover` barely has to crop anything.
+  'serviceontario-integration': {
+    src: '/home/ontario/live-regi-demo.mp4',
+    poster: '/home/ontario/live-regi-demo-poster.jpg',
+    aspectRatio: '1266 / 648',
+  },
 }
 
-// A still image fallback for projects with no screen-recording demo yet —
-// same cover treatment as the video previews above, just a static frame
-// instead. Live REGi doesn't have a demo clip, so its grid box would
-// otherwise render as an empty dark rectangle now that it's no longer
-// `comingSoon`.
-const IMAGE_BY_ID = {
-  'serviceontario-integration': '/home/ontario/cover.png',
-}
+// A still-image fallback for a project with no screen-recording demo yet —
+// same cover treatment as the video previews above, just a static frame.
+// Nothing currently uses this (Live REGi has a real demo clip now), but
+// it's kept so the next project without one doesn't render as an empty
+// dark rectangle — see the `image` fallback in PreviewBox below.
+const IMAGE_BY_ID = {}
 
 // Data-driven case studies (see PlaceholderCaseStudy.jsx) for projects
 // that don't have a bespoke page like Ophelia's yet — same sidebar/title/
@@ -84,7 +92,7 @@ const CASE_STUDY_DATA = {
     metadata: [
       { label: 'Role', value: 'Product Designer' },
       { label: 'Timeline', value: '12 months' },
-      { label: 'Team', value: '4 designers, 2 PMs, 6 developers' },
+      { label: 'Team', value: ['4 designers', '2 PMs', '6 developers'] },
     ],
     overviewText:
       "A redesign of Oakville & Milton Humane Society's digital adoption experience: from browsing and filtering adoptable pets to the admin tools staff use to manage tasks, interaction logs, and user profiles behind the scenes. Wireframes and the full write-up will be added here shortly.",
@@ -137,7 +145,10 @@ function PreviewBox({ slot, onOpen }) {
         onClick={disabled ? undefined : () => onOpen(slot.id)}
         style={{
           position: 'relative',
-          aspectRatio: '4 / 3',
+          // Shared 4:3 by default, overridden per-project when a video's
+          // own proportions are unusually wide/tall (see `aspectRatio` on
+          // VIDEO_BY_ID entries) so `cover` isn't cropping much off it.
+          aspectRatio: video?.aspectRatio ?? '4 / 3',
           cursor: disabled ? 'default' : 'pointer',
           overflow: 'hidden',
           background: video ? '#000' : image ? 'rgb(222, 232, 244)' : disabled ? slot.previewColor ?? '#e8e2d8' : 'rgba(0, 0, 0, 0.25)',
@@ -322,6 +333,7 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
+            {/* Cycle: Ophelia → Bitesize → Live REGi → OMHS → Ophelia. */}
             <OpheliaCaseStudy
               onBack={() => navigate('/work')}
               onNextProject={() => navigate('/work/bitesize')}
@@ -338,8 +350,8 @@ export default function WorkContent() {
           >
             <BitesizeCaseStudy
               onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/oakville-milton-humane-society')}
-              nextProjectLabel="OMHS"
+              onNextProject={() => navigate('/work/serviceontario-integration')}
+              nextProjectLabel="Live REGi"
             />
           </motion.div>
         ) : isLiveRegi ? (
@@ -352,8 +364,8 @@ export default function WorkContent() {
           >
             <LiveRegiCaseStudy
               onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/ophelia-ai-interface')}
-              nextProjectLabel="Ophelia"
+              onNextProject={() => navigate('/work/oakville-milton-humane-society')}
+              nextProjectLabel="OMHS"
             />
           </motion.div>
         ) : placeholderCaseStudy ? (
@@ -367,8 +379,8 @@ export default function WorkContent() {
             <PlaceholderCaseStudy
               {...placeholderCaseStudy}
               onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/serviceontario-integration')}
-              nextProjectLabel="Live REGi"
+              onNextProject={() => navigate('/work/ophelia-ai-interface')}
+              nextProjectLabel="Ophelia"
             />
           </motion.div>
         ) : openSlot ? (

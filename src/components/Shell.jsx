@@ -264,7 +264,7 @@ export default function Shell({ active }) {
                 <WorkHomeContent
                   onNavigate={goTo('/work')}
                   onNavigateToOphelia={goToProject('ophelia-ai-interface')}
-                  onNavigateToOMHS={goToProject('oakville-milton-humane-society')}
+                  onNavigateToLiveRegi={goToProject('serviceontario-integration')}
                   onNavigateToBitesize={goToProject('bitesize')}
                 />
               </div>
