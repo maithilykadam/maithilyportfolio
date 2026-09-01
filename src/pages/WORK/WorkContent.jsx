@@ -2,12 +2,15 @@ import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
+import { useIsMobile } from '../../hooks/useIsMobile.js'
 import { PROJECTS } from './projects.js'
 import OpheliaCaseStudy from './OpheliaCaseStudy.jsx'
+import OpheliaCaseStudyMobile from './OpheliaCaseStudyMobile.jsx'
 import BitesizeCaseStudy from './BitesizeCaseStudy.jsx'
 import LiveRegiCaseStudy from './LiveRegiCaseStudy.jsx'
 import OMHSCaseStudy from './OMHSCaseStudy.jsx'
 import PlaceholderCaseStudy from './PlaceholderCaseStudy.jsx'
+import CaseStudyNotReadyMobile from './CaseStudyNotReadyMobile.jsx'
 
 // Which projects (by id, from projects.js) actually fill the WORK grid,
 // and in what order — lets a project stay defined in projects.js (with all
@@ -269,6 +272,7 @@ export default function WorkContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const scrollRef = useRef(null)
+  const isMobile = useIsMobile()
 
   // Landing here straight via a refresh always scrolls fine; arriving via
   // the flip transition from another panel (see Shell.jsx's FLIP_VARIANTS)
@@ -352,12 +356,27 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            {/* Cycle: Ophelia → Bitesize → Live REGi → OMHS → Ophelia. */}
-            <OpheliaCaseStudy
-              onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/bitesize')}
-              nextProjectLabel="Bitesize"
-            />
+            {/* Cycle: Ophelia → Bitesize → Live REGi → OMHS → Ophelia.
+                Mobile gets its own single-column layout (see
+                OpheliaCaseStudyMobile.jsx) instead of the desktop's
+                sidebar + independently-scrolling content pane, which has
+                no room to fit a phone screen. Mobile's onBack goes
+                straight home rather than to the WORK grid — mobile
+                doesn't have a WORK grid page at all (see the note on
+                FEATURED_PROJECTS in HomeMobile.jsx). */}
+            {isMobile ? (
+              <OpheliaCaseStudyMobile
+                onBack={() => navigate('/')}
+                onNextProject={() => navigate('/work/bitesize')}
+                nextProjectLabel="Bitesize"
+              />
+            ) : (
+              <OpheliaCaseStudy
+                onBack={() => navigate('/work')}
+                onNextProject={() => navigate('/work/bitesize')}
+                nextProjectLabel="Bitesize"
+              />
+            )}
           </motion.div>
         ) : isBitesize ? (
           <motion.div
@@ -367,11 +386,22 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <BitesizeCaseStudy
-              onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/serviceontario-integration')}
-              nextProjectLabel="Live REGi"
-            />
+            {/* No mobile layout for Bitesize yet — see
+                CaseStudyNotReadyMobile.jsx and the note on Ophelia's
+                branch above. */}
+            {isMobile ? (
+              <CaseStudyNotReadyMobile
+                title="Bitesize"
+                onBack={() => navigate('/')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+              />
+            ) : (
+              <BitesizeCaseStudy
+                onBack={() => navigate('/work')}
+                onNextProject={() => navigate('/work/serviceontario-integration')}
+                nextProjectLabel="Live REGi"
+              />
+            )}
           </motion.div>
         ) : isLiveRegi ? (
           <motion.div
@@ -381,11 +411,19 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <LiveRegiCaseStudy
-              onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/oakville-milton-humane-society')}
-              nextProjectLabel="OMHS"
-            />
+            {isMobile ? (
+              <CaseStudyNotReadyMobile
+                title="Live REGi"
+                onBack={() => navigate('/')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+              />
+            ) : (
+              <LiveRegiCaseStudy
+                onBack={() => navigate('/work')}
+                onNextProject={() => navigate('/work/oakville-milton-humane-society')}
+                nextProjectLabel="OMHS"
+              />
+            )}
           </motion.div>
         ) : isOMHS ? (
           <motion.div
@@ -395,11 +433,19 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <OMHSCaseStudy
-              onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/ophelia-ai-interface')}
-              nextProjectLabel="Ophelia"
-            />
+            {isMobile ? (
+              <CaseStudyNotReadyMobile
+                title="Oakville & Milton Humane Society"
+                onBack={() => navigate('/')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+              />
+            ) : (
+              <OMHSCaseStudy
+                onBack={() => navigate('/work')}
+                onNextProject={() => navigate('/work/ophelia-ai-interface')}
+                nextProjectLabel="Ophelia"
+              />
+            )}
           </motion.div>
         ) : placeholderCaseStudy ? (
           <motion.div
@@ -409,12 +455,20 @@ export default function WorkContent() {
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
             style={{ flex: '1 1 auto', minHeight: 0 }}
           >
-            <PlaceholderCaseStudy
-              {...placeholderCaseStudy}
-              onBack={() => navigate('/work')}
-              onNextProject={() => navigate('/work/ophelia-ai-interface')}
-              nextProjectLabel="Ophelia"
-            />
+            {isMobile ? (
+              <CaseStudyNotReadyMobile
+                title={openSlot.title}
+                onBack={() => navigate('/')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+              />
+            ) : (
+              <PlaceholderCaseStudy
+                {...placeholderCaseStudy}
+                onBack={() => navigate('/work')}
+                onNextProject={() => navigate('/work/ophelia-ai-interface')}
+                nextProjectLabel="Ophelia"
+              />
+            )}
           </motion.div>
         ) : openSlot ? (
           <motion.div key="expanded" style={{ flex: '1 1 auto', minHeight: 0, position: 'relative' }}>

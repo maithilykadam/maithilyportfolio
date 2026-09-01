@@ -198,7 +198,11 @@ const VOLLEYBALL_PHOTOS = [
   'IMG_3486',
 ].map((name) => ({ src: PHOTO(name) }))
 
-const CATEGORY_PHOTOS = {
+// Exported (along with CATEGORY_CONTEXT, ALL_CONTEXT, ALL_ITEMS, and
+// GalleryItem below) so WhoMobile.jsx can build its own mobile-specific
+// masonry from the exact same real, curated photo data instead of keeping
+// a second copy that could drift out of sync.
+export const CATEGORY_PHOTOS = {
   'skies-nature': SKIES_PHOTOS,
   concerts: CONCERTS_PHOTOS,
   volleyball: VOLLEYBALL_PHOTOS,
@@ -206,7 +210,7 @@ const CATEGORY_PHOTOS = {
 
 // A line of context for each category — shown above the filtered photo
 // grid so a category reads as more than just a photo dump.
-const CATEGORY_CONTEXT = {
+export const CATEGORY_CONTEXT = {
   'skies-nature': 'Sunsets, skylines, and the outdoors, where I go to slow down and reset.',
   concerts: 'Live music, from stadium shows to festival stages, some of my favourite nights out.',
   volleyball:
@@ -216,7 +220,7 @@ const CATEGORY_CONTEXT = {
 // Same idea as CATEGORY_CONTEXT above, but for the default ("all") view —
 // shown above the full mixed feed so it reads as one intentional set
 // rather than an unlabeled dump of every category at once.
-const ALL_CONTEXT = 'A bit of everything, all mixed together: concerts, sunsets, volleyball, and the moments in between.'
+export const ALL_CONTEXT = 'A bit of everything, all mixed together: concerts, sunsets, volleyball, and the moments in between.'
 
 // A handful of real photos that were never sorted into one of the three
 // categories above (still just sitting at the folder root).
@@ -257,12 +261,12 @@ function withSpecialItemsSpread(photos, specials) {
 // and with the widget card spread through — this is the full "everything"
 // list, rendered by ScrollingGallery below — so it automatically grows as
 // more photos get added to any folder.
-const ALL_ITEMS = withSpecialItemsSpread(
+export const ALL_ITEMS = withSpecialItemsSpread(
   interleave([SKIES_PHOTOS, CONCERTS_PHOTOS, VOLLEYBALL_PHOTOS, UNCATEGORIZED_PHOTOS]),
   ALL_SPECIAL_ITEMS,
 )
 
-function GalleryItem({ item }) {
+export function GalleryItem({ item }) {
   if (item.caption) return <Caption text={item.caption} />
   if (item.widget) return <Widget kind={item.widget} />
   return <Photo src={item.src} />

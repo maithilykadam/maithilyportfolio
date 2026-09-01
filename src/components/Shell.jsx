@@ -12,9 +12,11 @@ import HeroContent from '../pages/Landing/HeroContent.jsx'
 import HomeMobile from '../pages/Landing/HomeMobile.jsx'
 import WhoContent from '../pages/WHO/WhoContent.jsx'
 import WhoFilters from '../pages/WHO/WhoFilters.jsx'
+import WhoMobile from '../pages/WHO/WhoMobile.jsx'
 import WorkContent from '../pages/WORK/WorkContent.jsx'
 import WorkHomeContent from '../pages/WORK/WorkHomeContent.jsx'
 import PlayContent from '../pages/PLAY/PlayContent.jsx'
+import PlayContentMobile from '../pages/PLAY/PlayContentMobile.jsx'
 import { HOME_WORK_OFFSET } from '../constants/layout.js'
 import { rpx } from '../constants/responsive.js'
 import { useIsMobile } from '../hooks/useIsMobile.js'
@@ -326,7 +328,16 @@ export default function Shell({ active }) {
                 flexDirection: 'column',
               }}
             >
-              <ExpandedHeader label="WORK" />
+              {/* Hidden on mobile while viewing a specific case study (see
+                  isCaseStudyPage above) — the mobile case study layouts
+                  (e.g. OpheliaCaseStudyMobile.jsx) supply their own top
+                  padding to clear MobileNav's button and their own "←
+                  Back" link, the same way HomeMobile/WhoMobile skip
+                  ExpandedHeader entirely. A plain "WORK" label above a
+                  page that isn't the WORK grid, on top of MobileNav's own
+                  menu, would just be redundant chrome eating vertical
+                  space on a phone. */}
+              {!(isMobile && isCaseStudyPage) && <ExpandedHeader label="WORK" />}
               {/* Safety-net overflow here too, in addition to WorkContent's
                   own internal overflowY — if this wrapper's height:100%
                   pass-through into WorkContent ever fails to resolve to a
@@ -343,16 +354,32 @@ export default function Shell({ active }) {
             </div>
           )}
 
-          {active === 'who' && (
-            /* WHO panel — a flex column (rather than plain stacked children
-                like the other panels) so ExpandedHeader keeps its natural
-                height and WhoContent gets exactly whatever's left via flex: 1.
-                That's what lets WhoContent's own height: 100% mean something
-                real, which its two columns (bio text, photo gallery) both
-                rely on to scroll independently within their own bounds — see
-                WhoContent.jsx. overflow stays hidden here at the outer level
-                since neither column should ever push the panel itself past
-                the viewport; each one scrolls internally instead. */
+          {active === 'who' && isMobile && (
+            /* WHO panel — mobile. One normal scrolling page (see
+                WhoMobile.jsx: text snippet → filters → photos, all in
+                document flow) instead of the desktop's fixed-height split
+                (ExpandedHeader + two independently-scrolling columns) —
+                no room for a second column on a phone anyway. No
+                ExpandedHeader either, matching HomeMobile's approach:
+                MobileNav's menu already provides wayfinding, so a
+                redundant "WHO" label up top isn't needed. */
+            <div style={{ position: 'relative', width: '100vw', height: '100%', overflow: 'hidden auto', paddingBottom: '24px' }}>
+              <WhoMobile category={whoCategory} onCategoryChange={setWhoCategory} />
+            </div>
+          )}
+
+          {active === 'who' && !isMobile && (
+            /* WHO panel — desktop. A flex column (rather than plain
+                stacked children like the other panels) so ExpandedHeader
+                keeps its natural height and WhoContent gets exactly
+                whatever's left via flex: 1. That's what lets WhoContent's
+                own height: 100% mean something real, which its two
+                columns (bio text, photo gallery) both rely on to scroll
+                independently within their own bounds — see
+                WhoContent.jsx. overflow stays hidden here at the outer
+                level since neither column should ever push the panel
+                itself past the viewport; each one scrolls internally
+                instead. */
             <div
               style={{
                 position: 'relative',
@@ -370,10 +397,22 @@ export default function Shell({ active }) {
             </div>
           )}
 
-          {active === 'play' && (
-            /* PLAYGROUND panel — same paddingBottom fix as WORK, so the last
-                row of pieces in the gallery list clears the bottom edge
-                instead of stopping right underneath it. */
+          {active === 'play' && isMobile && (
+            /* PLAYGROUND panel — mobile. A 2-column bento masonry (see
+                PlayContentMobile.jsx) instead of the desktop's hand-split
+                left/right layout, which needs the full-width blurb column
+                a phone doesn't have room for. No ExpandedHeader, matching
+                Home/WHO's mobile approach — MobileNav's menu already
+                covers wayfinding. */
+            <div style={{ position: 'relative', width: '100vw', height: '100%', overflow: 'hidden auto', paddingBottom: '24px' }}>
+              <PlayContentMobile />
+            </div>
+          )}
+
+          {active === 'play' && !isMobile && (
+            /* PLAYGROUND panel — desktop. Same paddingBottom fix as WORK,
+                so the last row of pieces in the gallery list clears the
+                bottom edge instead of stopping right underneath it. */
             <div
               style={{
                 position: 'relative',

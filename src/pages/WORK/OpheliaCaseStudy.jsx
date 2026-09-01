@@ -6,22 +6,25 @@ import ScreenFrame from './ScreenFrame.jsx'
 // Same navy used for the custom cursor's case-study hover state — reused
 // here so "active nav item" reads as the same accent color everywhere on
 // the site, not a one-off.
-const NAVY = '#1e3a8a'
-const HAIRLINE = '1px solid rgba(0, 0, 0, 0.1)'
+export const NAVY = '#1e3a8a'
+export const HAIRLINE = '1px solid rgba(0, 0, 0, 0.1)'
 // Ophelia's own accent color (see previewColor in projects.js) — reused as
 // the fill for the not-yet-recorded "in motion" GIF slots, same idea as
 // the WORK grid's "coming soon" boxes: a project's own soft color reads as
 // "this one, just not ready yet" rather than a flat gray placeholder.
-const ACCENT = '#e8d4c9'
+export const ACCENT = '#e8d4c9'
 // A pale tint of Ophelia's real brand green, Neon Mint (see BRAND_COLORS
 // below) — used as the mat behind each flow's video, so that background
 // ties back to the actual brand instead of being an arbitrary color.
-const VIDEO_MAT = 'rgba(101, 252, 159, 0.32)'
+export const VIDEO_MAT = 'rgba(101, 252, 159, 0.32)'
 
 // Shared scroll-in animation for every section below — fades and rises
 // into place as it enters the viewport, `once: true` so it doesn't
-// re-trigger scrolling back up. Spread onto each `motion.section`.
-const REVEAL = {
+// re-trigger scrolling back up. Spread onto each `motion.section`. Exported
+// so OpheliaCaseStudyMobile.jsx can reuse the exact same reveal instead of
+// redefining it — it's plain opacity/y/duration, none of it rpx-based, so
+// there's nothing mobile-unsafe about sharing it as-is.
+export const REVEAL = {
   initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: '-100px 0px' },
@@ -32,14 +35,14 @@ const REVEAL = {
 // guidelines (Branding Ophelia board) — not invented. Obsidian is the
 // brand's near-black, used here instead of plain #000 for the dark
 // wordmark card below.
-const BRAND_COLORS = [
+export const BRAND_COLORS = [
   { name: 'Neon Mint', hex: '#65FC9F' },
   { name: 'Quiet Ash', hex: '#BDBDBD' },
   { name: 'Obsidian', hex: '#0B0D11' },
   { name: 'Pure White', hex: '#FFFFFF' },
 ]
 
-const METADATA = [
+export const METADATA = [
   { label: 'Role', value: 'UX Designer' },
   { label: 'Timeline', value: 'Jan – Apr 2026' },
   { label: 'Team', value: 'Founders, developers, and designers, all closely involved' },
@@ -79,7 +82,7 @@ const METADATA = [
 // That's the difference between a screenshot dump and documented design
 // thinking: a recruiter should be able to tell what problem each screen is
 // actually solving without me standing there explaining it.
-const FLOWS = [
+export const FLOWS = [
   {
     nav: 'Explore & Organize',
     transition: 'From there, into the product itself, starting with just finding your way around.',
@@ -120,7 +123,7 @@ const FLOWS = [
 // than a single feature, so it gets its own section instead of living in
 // FLOWS. Captions describe what's on screen; the in-app copy (quoted) is
 // real, not written for this page.
-const ONBOARDING = [
+export const ONBOARDING = [
   {
     src: '/home/ophelia/onboarding/step-1-welcome.png',
     step: 'Welcome',
@@ -155,7 +158,7 @@ const ONBOARDING = [
 // `video` below for the layout reasoning). Each clip keeps its own native,
 // very-wide-and-short aspect ratio rather than being forced into a 16:10
 // ScreenFrame.
-const DETAILS = [
+export const DETAILS = [
   {
     title: 'Loading, narrated',
     caption: '"Gathering your canvas" counts up by asset instead of sitting on a blank spinner, then hands off to a plain "have fun creating."',
@@ -176,7 +179,7 @@ const DETAILS = [
 // A real excerpt from the founders' own written manifesto (their words, not
 // invented) — the six-part grid this used to be tried too hard; one strong
 // line does more than six small ones competing for attention.
-const MANIFESTO_QUOTE =
+export const MANIFESTO_QUOTE =
   'We will not throw ourselves at the feet of tools that automate what is good about the human soul. We refuse.'
 
 // Sidebar nav — Overview, Problem (now includes the manifesto excerpts
