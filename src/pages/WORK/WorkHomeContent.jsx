@@ -103,13 +103,13 @@ function PlaceholderBox({ area, onClick, video, image, title }) {
  * mechanism needed. Each box still jumps to the full WORK page on click.
  *
  * `onNavigate` — go to the WORK grid (used by the "view more projects"
- * link). `onNavigateToOphelia` / `onNavigateToLiveRegi` / `onNavigateToBitesize`
+ * link). `onNavigateToOphelia` / `onNavigateToLiveRegi` / `onNavigateToOMHS`
  * — go straight into that project's case study instead of the grid, wired
- * to the Ophelia, Live REGi, and Bitesize boxes specifically. Live REGi
- * replaced OMHS in this rotation of 3 (OMHS's own case study is still up
+ * to the Ophelia, Live REGi, and OMHS boxes specifically. OMHS replaced
+ * Bitesize in this rotation of 3 (Bitesize's own case study is still up
  * on the full WORK grid, just not one of the 3 featured here).
  */
-export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToLiveRegi, onNavigateToBitesize }) {
+export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNavigateToLiveRegi, onNavigateToOMHS }) {
   return (
     <>
       {/* "WORK" label removed — the top nav (now living at the top of the
@@ -175,9 +175,9 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNav
         />
         <PlaceholderBox
           area="bottomLeft"
-          onClick={onNavigateToBitesize}
-          video={{ src: '/home/bitesize/bitesize-demo.mp4', poster: '/home/bitesize/bitesize-demo-poster.jpg' }}
-          title="Bitesize"
+          onClick={onNavigateToOMHS}
+          video={{ src: '/home/humanesociety/humanesociety-demo.mp4', poster: '/home/humanesociety/humanesociety-demo-poster.jpg' }}
+          title="Oakville & Milton Humane Society"
         />
       </div>
     </>

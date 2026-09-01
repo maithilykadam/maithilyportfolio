@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { rpx, rvh } from '../constants/responsive.js'
 
-const CONTACT_OPTIONS = [
+// Exported so MobileBottomBar.jsx can reuse the same real data for its own
+// tap-to-reveal contact list instead of duplicating it.
+export const CONTACT_OPTIONS = [
   { label: 'Email', href: 'mailto:maithily.kadam@gmail.com' },
   { label: 'LinkedIn', href: 'https://linkedin.com/in/maithilykadam/', external: true },
 ]
@@ -133,6 +135,7 @@ export default function ContactLink({ active }) {
             padding: `${rpx(8)} ${rpx(14)}`,
             margin: `${rpx(-8)} ${rpx(-14)}`,
             borderRadius: '999px',
+            border: '1px solid rgba(0, 0, 0, 0.12)',
           }}
         >
           <span>Contact</span>

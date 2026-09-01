@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import ExpandedHeader from './ExpandedHeader.jsx'
 import PlaygroundRail from './PlaygroundRail.jsx'
 import BottomStepper from './BottomStepper.jsx'
+import MobileNav from './MobileNav.jsx'
 import ResumeLink from './ResumeLink.jsx'
 import ContactLink from './ContactLink.jsx'
 import CustomCursor from './CustomCursor.jsx'
 import HeroContent from '../pages/Landing/HeroContent.jsx'
+import HomeMobile from '../pages/Landing/HomeMobile.jsx'
 import WhoContent from '../pages/WHO/WhoContent.jsx'
 import WhoFilters from '../pages/WHO/WhoFilters.jsx'
 import WorkContent from '../pages/WORK/WorkContent.jsx'
@@ -15,6 +17,7 @@ import WorkHomeContent from '../pages/WORK/WorkHomeContent.jsx'
 import PlayContent from '../pages/PLAY/PlayContent.jsx'
 import { HOME_WORK_OFFSET } from '../constants/layout.js'
 import { rpx } from '../constants/responsive.js'
+import { useIsMobile } from '../hooks/useIsMobile.js'
 
 // Fixed left-to-right order of the four full-screen panels. Navigating
 // slides the whole track horizontally so the target panel lines up exactly
@@ -25,33 +28,42 @@ const SECTIONS = ['home', 'work', 'who', 'play']
 const PATH_FOR_SECTION = { home: '/', work: '/work', who: '/who', play: '/play' }
 const N = SECTIONS.length
 
-// A 3D "page turn" instead of the old literal panel-slide: the outgoing
-// panel tilts away on its Y axis while fading, the incoming one tilts in
-// from the opposite side while fading up to full opacity. Pushed to a
-// real, felt turn (65°, plus a tighter 1000px perspective so the rotation
-// has actual foreshortening) rather than the first pass's 18°, which read
-// as barely-there. Still stops short of a full 90° edge-on book-page swing
-// and there's no paper texture/curl, so it stays closer to "the spread
-// tilting" than a skeuomorphic page-flip widget.
+// Same idea as SECTIONS above, minus WORK — MobileNav's menu (mobile only)
+// doesn't link to the WORK grid at all, since HomeMobile now lists every
+// case study directly rather than sending people to a separate page for
+// it (see the note on FEATURED_PROJECTS in HomeMobile.jsx). SECTIONS
+// itself stays untouched — it still drives arrow-key stepping and the
+// desktop BottomStepper, both of which are unrelated to this.
+const MOBILE_NAV_SECTIONS = SECTIONS.filter((section) => section !== 'work')
+
+// Scrapped the 3D page-turn — a rotateY flip is inherently fragile (leans
+// on perspective, transform-origin, and timing all agreeing with each
+// other) and it read as glitchy/tacky in practice, not worth the risk for
+// a section transition. This is a plain, clean crossfade with a small
+// directional nudge (24px) instead: the outgoing panel fades out while
+// nudging slightly the way it "came from," the incoming panel fades in
+// while settling into place from a slight offset in the direction of
+// travel. No 3D, no perspective, nothing that can render inconsistently —
+// just opacity + a small translateX, so it can't glitch.
 //
 // `custom` is the direction (1 = moving forward through SECTIONS, -1 =
 // backward), computed below from whichever index the URL was on right
 // before this change, so it works the same whether the nav came from
 // jumpTo(), the arrow keys, or the browser's own back/forward buttons.
-const FLIP_VARIANTS = {
+const PANEL_VARIANTS = {
   enter: (direction) => ({
-    rotateY: direction > 0 ? 65 : -65,
     opacity: 0,
+    x: direction > 0 ? 24 : -24,
   }),
   center: {
-    rotateY: 0,
     opacity: 1,
-    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+    x: 0,
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
   },
   exit: (direction) => ({
-    rotateY: direction > 0 ? -65 : 65,
     opacity: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    x: direction > 0 ? -24 : 24,
+    transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
   }),
 }
 
@@ -73,6 +85,7 @@ const FLIP_VARIANTS = {
 export default function Shell({ active }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const isMobile = useIsMobile()
 
   // Null while viewing a case study (a /work/:projectId sub-path) rather
   // than the WORK grid itself — passed to BottomStepper as `activeLabel`
@@ -104,11 +117,6 @@ export default function Shell({ active }) {
     }
   }, [active])
 
-  // The flipping panel — ref points at whichever panel DOM node is
-  // currently mounted (a fresh node each time `active` changes, since
-  // AnimatePresence keys on it).
-  const panelRef = useRef(null)
-
   // True only for the very first render of the whole app (whichever route
   // it happened to load on), flipped false right after. Used below so the
   // very first panel skips its own flip-in (there's nothing to flip FROM
@@ -127,27 +135,33 @@ export default function Shell({ active }) {
     isFirstRenderRef.current = false
   }, [])
 
-  // Once the flip settles at rotateY(0), explicitly clear the element's
+  // Once the transition settles at x:0, explicitly clear the panel's
   // `transform` back to a real `none` instead of leaving Framer Motion's
-  // `perspective(1000px) rotateY(0deg)` sitting on it. Even at a pure
-  // identity rotation, ANY non-`none` transform value makes that element
-  // the containing block for every position:absolute descendant — which
-  // includes the WORK case-study list, HeroContent's name/tagline, etc.
-  // That new containing block combined with the hero name's intentional
-  // spill-over into the case-study column (see HeroContent.jsx) was
-  // silently swallowing hover/click on the first case study in Safari,
-  // which handles pointer-events: none differently inside a transformed
-  // ancestor. Clearing the transform once the turn is done — well after
-  // the 0.65s "center" tween finishes — restores the exact pre-flip
-  // behavior during the (much more common) idle/settled state; the very
-  // next transition simply re-drives `transform` itself and overrides
-  // this, so the flip's visual is untouched.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (panelRef.current) panelRef.current.style.transform = 'none'
+  // `translateX(0px)` sitting on it. Even at a pure identity translation,
+  // ANY non-`none` transform value makes that element the containing block
+  // for every position:absolute descendant (the WORK case-study list,
+  // HeroContent's name/tagline, etc.) and, it turns out, can also stop a
+  // nested overflow:auto region from responding to trackpad scroll in some
+  // browsers — which is what made landing on WORK via a transition from
+  // another panel leave the grid stuck (a hard refresh straight to /work
+  // skips the transition entirely, so it was never affected).
+  //
+  // This used to live in a separate effect that read the node back off a
+  // shared `panelRef` on a delay — but AnimatePresence's default "sync"
+  // mode keeps the exiting panel mounted (with that same ref) right
+  // alongside the freshly-entered one for the whole transition, and
+  // whichever one committed its ref last won, so the timeout could end up
+  // clearing the transform on the panel about to be removed instead of
+  // the one actually on screen. Doing it here in the callback ref instead
+  // closes over the specific DOM node for THIS mount only — nothing
+  // shared, nothing to race. The old node's own timer (from its own
+  // mount) firing after it's already been removed is harmless.
+  const setPanelRef = useCallback((node) => {
+    if (!node) return
+    setTimeout(() => {
+      node.style.transform = 'none'
     }, 700)
-    return () => clearTimeout(timer)
-  }, [active])
+  }, [])
 
   // Every kind of navigation funnels through here — just updates the
   // route; the flip transition itself is driven by `active` changing.
@@ -219,31 +233,48 @@ export default function Shell({ active }) {
         height: '100vh',
         overflow: 'hidden',
         background: 'var(--color-bg)',
-        perspective: 1000,
       }}
     >
       {/* Exactly one panel mounted at a time — whichever matches `active` —
-          swapped via AnimatePresence using FLIP_VARIANTS above. Replaces
+          swapped via AnimatePresence using PANEL_VARIANTS above. Replaces
           the old wide sliding track; each panel keeps the same internal
           layout it always had, just moved from being one of 4 side-by-side
           flex children to being the sole absolutely-positioned child here. */}
       <AnimatePresence custom={direction}>
         <motion.div
-          ref={panelRef}
+          ref={setPanelRef}
           key={active}
           custom={direction}
-          variants={FLIP_VARIANTS}
+          variants={PANEL_VARIANTS}
           initial={isFirstRenderRef.current ? false : 'enter'}
           animate="center"
           exit="exit"
           style={{
             position: 'absolute',
             inset: 0,
-            transformPerspective: 1000,
           }}
         >
-          {active === 'home' && (
-            /* HOME panel */
+          {active === 'home' && isMobile && (
+            /* HOME panel — mobile. A real single-column, scrolling layout
+                (see HomeMobile.jsx) instead of the desktop's fixed 100vh
+                absolute-positioned overlay + asymmetric grid, which has no
+                room to reflow at phone widths. Nav lives in MobileNav's
+                fixed top-right button now (not a bottom bar), so this only
+                needs a small bottom gutter, not clearance for anything
+                fixed. */
+            <div style={{ position: 'relative', width: '100vw', height: '100%', overflow: 'hidden auto', paddingBottom: '24px' }}>
+              <HomeMobile
+                onWho={() => jumpTo('who')}
+                onOphelia={goToProject('ophelia-ai-interface')}
+                onLiveRegi={goToProject('serviceontario-integration')}
+                onBitesize={goToProject('bitesize')}
+                onOMHS={goToProject('oakville-milton-humane-society')}
+              />
+            </div>
+          )}
+
+          {active === 'home' && !isMobile && (
+            /* HOME panel — desktop */
             <div style={{ position: 'relative', width: '100vw', height: '100%', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
                 <HeroContent onWhoClick={() => jumpTo('who')} />
@@ -265,7 +296,7 @@ export default function Shell({ active }) {
                   onNavigate={goTo('/work')}
                   onNavigateToOphelia={goToProject('ophelia-ai-interface')}
                   onNavigateToLiveRegi={goToProject('serviceontario-integration')}
-                  onNavigateToBitesize={goToProject('bitesize')}
+                  onNavigateToOMHS={goToProject('oakville-milton-humane-society')}
                 />
               </div>
 
@@ -296,7 +327,17 @@ export default function Shell({ active }) {
               }}
             >
               <ExpandedHeader label="WORK" />
-              <div style={{ flex: '1 1 auto', minHeight: 0 }}>
+              {/* Safety-net overflow here too, in addition to WorkContent's
+                  own internal overflowY — if this wrapper's height:100%
+                  pass-through into WorkContent ever fails to resolve to a
+                  definite size for any reason (trackpad scroll got reported
+                  stuck once the grid grew past one screen), this outer
+                  boundary still has a real flex-resolved height of its own
+                  and catches the overflow directly instead of leaving
+                  nothing able to scroll. Harmless when the inner one is
+                  already working — only one of the two ever actually shows
+                  a scrollbar. */}
+              <div style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto' }}>
                 <WorkContent />
               </div>
             </div>
@@ -307,9 +348,11 @@ export default function Shell({ active }) {
                 like the other panels) so ExpandedHeader keeps its natural
                 height and WhoContent gets exactly whatever's left via flex: 1.
                 That's what lets WhoContent's own height: 100% mean something
-                real, which is how the gallery inside it can fill the rest of
-                the screen with no scrollbar. overflow stays hidden (not auto)
-                since the gallery is deliberately never meant to scroll. */
+                real, which its two columns (bio text, photo gallery) both
+                rely on to scroll independently within their own bounds — see
+                WhoContent.jsx. overflow stays hidden here at the outer level
+                since neither column should ever push the panel itself past
+                the viewport; each one scrolls internally instead. */
             <div
               style={{
                 position: 'relative',
@@ -347,16 +390,29 @@ export default function Shell({ active }) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Resume — fixed to the bottom-left corner across every panel. */}
-      <ResumeLink active={active} />
+      {/* Persistent chrome across every panel. On mobile the three separate
+          fixed corner pieces below (Resume bottom-left, Contact
+          bottom-right, BottomStepper's nav pill bottom-center) have no
+          room to coexist without overlapping — and shouldn't just be the
+          same bottom-pill treatment moved around anyway — so MobileNav
+          replaces all three with a single top-right menu button instead.
+          See MobileNav.jsx. */}
+      {isMobile ? (
+        <MobileNav active={active} activeLabel={navActiveLabel} sections={MOBILE_NAV_SECTIONS} onSelect={jumpTo} />
+      ) : (
+        <>
+          {/* Resume — fixed to the bottom-left corner across every panel. */}
+          <ResumeLink active={active} />
 
-      {/* Contact — the mirror image on the bottom-right, same treatment. */}
-      <ContactLink active={active} />
+          {/* Contact — the mirror image on the bottom-right, same treatment. */}
+          <ContactLink active={active} />
 
-      {/* Bottom nav — small dots (per the sketch) that grow and reveal a
-          label on hover; clicking one jumps straight to that section
-          rather than stepping through the panels in between. */}
-      <BottomStepper active={active} activeLabel={navActiveLabel} sections={SECTIONS} onSelect={jumpTo} />
+          {/* Bottom nav — small dots (per the sketch) that grow and reveal a
+              label on hover; clicking one jumps straight to that section
+              rather than stepping through the panels in between. */}
+          <BottomStepper active={active} activeLabel={navActiveLabel} sections={SECTIONS} onSelect={jumpTo} />
+        </>
+      )}
 
       {/* Custom cursor — mounted once here (not per-panel) so it persists
           across every page instead of remounting/flickering on

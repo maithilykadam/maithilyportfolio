@@ -4,8 +4,9 @@ import { rpx } from '../constants/responsive.js'
 
 // Uppercase, matching how the section labels already read everywhere else
 // on the site (ExpandedHeader's "WHO" / "WORK" / "PLAYGROUND") rather than
-// the lowercase the earlier dot version used.
-const LABEL = { home: 'HOME', work: 'WORK', who: 'WHO', play: 'PLAYGROUND' }
+// the lowercase the earlier dot version used. Exported so MobileBottomBar
+// can reuse the exact same labels.
+export const LABEL = { home: 'HOME', work: 'WORK', who: 'WHO', play: 'PLAYGROUND' }
 
 // A thin vertical rule between two words — the print-masthead way of
 // separating section names (e.g. "NEWS | POLITICS | ARTS"), instead of a
@@ -18,7 +19,9 @@ function Divider() {
 // darkens and gets a thin underline (a rubric line, like a printed section
 // flag) when it's the active one; hover just darkens toward that same
 // resting state so clicking around doesn't feel like pressing a button.
-function NavWord({ section, isActive, onClick }) {
+// Exported so MobileBottomBar.jsx's tab row can reuse the exact same
+// active/hover treatment instead of a re-implementation.
+export function NavWord({ section, isActive, onClick }) {
   const [hovered, setHovered] = useState(false)
 
   return (

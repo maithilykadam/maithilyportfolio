@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
@@ -5,6 +6,7 @@ import { PROJECTS } from './projects.js'
 import OpheliaCaseStudy from './OpheliaCaseStudy.jsx'
 import BitesizeCaseStudy from './BitesizeCaseStudy.jsx'
 import LiveRegiCaseStudy from './LiveRegiCaseStudy.jsx'
+import OMHSCaseStudy from './OMHSCaseStudy.jsx'
 import PlaceholderCaseStudy from './PlaceholderCaseStudy.jsx'
 
 // Which projects (by id, from projects.js) actually fill the WORK grid,
@@ -16,9 +18,9 @@ import PlaceholderCaseStudy from './PlaceholderCaseStudy.jsx'
 // the scrolling note below).
 const WORK_GRID_IDS = [
   'ophelia-ai-interface',
+  'serviceontario-integration',
   'bitesize',
   'oakville-milton-humane-society',
-  'serviceontario-integration',
   'orbit-mobile-design',
 ]
 // Real projects that don't have a written-up case study yet — their boxes
@@ -28,7 +30,7 @@ const WORK_GRID_IDS = [
 // soon" repeated twice — Orbit gets a space pun off its own name, a nice
 // bit of "in on the joke" personality rather than a generic placeholder.
 const COMING_SOON_LINES = {
-  'orbit-mobile-design': 'Still in orbit — hasn’t landed yet 🚀',
+  'orbit-mobile-design': 'Still in orbit, hasn’t landed yet 🚀',
 }
 
 const SLOTS = WORK_GRID_IDS.map((id, i) => {
@@ -80,24 +82,11 @@ const IMAGE_BY_ID = {}
 // Data-driven case studies (see PlaceholderCaseStudy.jsx) for projects
 // that don't have a bespoke page like Ophelia's yet — same sidebar/title/
 // Overview structure, just filled in with each project's own video and
-// text instead of a one-off component per project. No `screens` yet for
-// either — real wireframes get dropped into each project's public folder
-// later, at which point a `screens` array here is all that's needed to
-// make the Solution grid appear (see that file's doc comment).
-const CASE_STUDY_DATA = {
-  'oakville-milton-humane-society': {
-    title: 'OMHS',
-    tagline: 'Redesigning the digital adoption experience for Oakville & Milton Humane Society',
-    video: VIDEO_BY_ID['oakville-milton-humane-society'],
-    metadata: [
-      { label: 'Role', value: 'Product Designer' },
-      { label: 'Timeline', value: '12 months' },
-      { label: 'Team', value: ['4 designers', '2 PMs', '6 developers'] },
-    ],
-    overviewText:
-      "A redesign of Oakville & Milton Humane Society's digital adoption experience: from browsing and filtering adoptable pets to the admin tools staff use to manage tasks, interaction logs, and user profiles behind the scenes. Wireframes and the full write-up will be added here shortly.",
-  },
-}
+// text instead of a one-off component per project. OMHS moved out of here
+// and into its own OMHSCaseStudy.jsx now that it has a real write-up (see
+// the isOMHS branch below) — this stays empty, ready for whichever project
+// gets a placeholder page next.
+const CASE_STUDY_DATA = {}
 
 function chunkIntoColumns(items, columns) {
   const cols = Array.from({ length: columns }, () => [])
@@ -279,6 +268,31 @@ function PreviewBox({ slot, onOpen }) {
 export default function WorkContent() {
   const location = useLocation()
   const navigate = useNavigate()
+  const scrollRef = useRef(null)
+
+  // Landing here straight via a refresh always scrolls fine; arriving via
+  // the flip transition from another panel (see Shell.jsx's FLIP_VARIANTS)
+  // doesn't — this component mounts brand new each time (its whole
+  // ancestor chain remounts with the flip's `key={active}`), while that
+  // ancestor still has an active/settling CSS transform on it. Some
+  // browsers don't properly attach scroll/wheel handling to a scrollable
+  // element that's created while an ancestor's transform is still live,
+  // and never retry once it settles — a real refresh (no transform ever
+  // touched) never hits this, which matches exactly what's being seen.
+  // Forcing an overflow toggle + a synchronous layout read shortly after
+  // mount makes the browser recompute this element's scroll node from
+  // scratch, which is the standard fix for that class of bug.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const timer = setTimeout(() => {
+      const prev = el.style.overflowY
+      el.style.overflowY = 'hidden'
+      void el.offsetHeight
+      el.style.overflowY = prev || 'auto'
+    }, 750)
+    return () => clearTimeout(timer)
+  }, [])
   const openId = location.pathname.split('/')[2] ?? null
   const openSlot = SLOTS.find((slot) => slot.id === openId) ?? null
   // Ophelia gets a real, full-bleed case study page (sidebar + scrolling
@@ -293,13 +307,18 @@ export default function WorkContent() {
   // Live REGi also gets its own bespoke case-study page (see
   // LiveRegiCaseStudy.jsx) — same reasoning as Ophelia/Bitesize above.
   const isLiveRegi = openSlot?.id === 'serviceontario-integration'
+  // OMHS also gets its own bespoke case-study page now (see
+  // OMHSCaseStudy.jsx) instead of the generic placeholder — same reasoning
+  // as Ophelia/Bitesize/Live REGi above.
+  const isOMHS = openSlot?.id === 'oakville-milton-humane-society'
   // Same full-bleed treatment for any other project with a real (if still
   // partly placeholder) case-study page — see CASE_STUDY_DATA above.
   const placeholderCaseStudy = openSlot ? CASE_STUDY_DATA[openSlot.id] : null
-  const isFullCaseStudy = isOphelia || isBitesize || isLiveRegi || Boolean(placeholderCaseStudy)
+  const isFullCaseStudy = isOphelia || isBitesize || isLiveRegi || isOMHS || Boolean(placeholderCaseStudy)
 
   return (
     <div
+      ref={scrollRef}
       style={{
         height: '100%',
         display: 'flex',
@@ -366,6 +385,20 @@ export default function WorkContent() {
               onBack={() => navigate('/work')}
               onNextProject={() => navigate('/work/oakville-milton-humane-society')}
               nextProjectLabel="OMHS"
+            />
+          </motion.div>
+        ) : isOMHS ? (
+          <motion.div
+            key="omhs"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.3 } }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            style={{ flex: '1 1 auto', minHeight: 0 }}
+          >
+            <OMHSCaseStudy
+              onBack={() => navigate('/work')}
+              onNextProject={() => navigate('/work/ophelia-ai-interface')}
+              nextProjectLabel="Ophelia"
             />
           </motion.div>
         ) : placeholderCaseStudy ? (

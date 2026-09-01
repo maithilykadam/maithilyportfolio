@@ -26,7 +26,7 @@ export const PROJECTS = [
   {
     id: 'oakville-milton-humane-society',
     label: '02 // Oakville and Milton Humane Society',
-    description: 'Redesigning the digital adoption experience',
+    description: 'A pet-care and volunteer management tool for an animal shelter',
     previewColor: '#c9d6e8',
     previewGroups: [
       [

@@ -144,6 +144,26 @@ const TUTORIAL_GROUPS = [
   },
 ]
 
+// Real numbers from MRTR's own modeling, not invented for the case study.
+// Kept separate from ACCURACY_STATS below because they're a different kind
+// of claim: these four are projections ("estimated to save," "could result
+// in"), not something already measured.
+const IMPACT_STATS = [
+  { value: '$31.75M–$34.5M', label: "projected savings for businesses over the 5 years following REGi's full maturity" },
+  { value: '$4.70–$5.11', label: 'estimated return per $1 invested' },
+  { value: '$6.82M', label: 'projected OPS savings in FY27/28, once fully scaled across all ministries' },
+  { value: '$5.32M', label: 'projected annual OPS savings from FY28/29 onward' },
+]
+
+// Unlike IMPACT_STATS above, these are measured, not modeled: how often
+// REGi's own read of a draft matches reality and matches a policy
+// professional's own judgment.
+const ACCURACY_STATS = [
+  { value: '94%', label: 'of the time, REGi catches the RCRs present in a draft' },
+  { value: '95%', label: 'of the time, it correctly identifies and classifies RCRs at scale' },
+  { value: '91%', label: "of the time, its classifications match a policy professional's own" },
+]
+
 // Sidebar nav data — a flat list of clickable items, except "Flows" which
 // groups the three flow sections as indented children. `index` still lines
 // up 1:1 with each section's real position in the page (and its
@@ -160,7 +180,8 @@ const NAV_ITEMS = [
     ],
   },
   { label: 'Design Considerations', index: 4 },
-  { label: 'Reflection', index: 5 },
+  { label: 'Results', index: 5 },
+  { label: 'Reflection', index: 6 },
 ]
 
 // Same connective-line pattern as every other case study's Transition
@@ -325,6 +346,81 @@ function ClickableImage({ src, alt, onClick, maxHeight }) {
   )
 }
 
+// Same click-to-pause treatment, and the same clip, as the hover preview on
+// the WORK grid (see VIDEO_BY_ID in WorkContent.jsx) — the case study's own
+// hero used a static screenshot before there was a real demo recording to
+// use instead.
+function PlayableVideo({ src, poster }) {
+  const videoRef = useRef(null)
+  const [playing, setPlaying] = useState(true)
+
+  const toggle = () => {
+    const el = videoRef.current
+    if (!el) return
+    if (el.paused) {
+      el.play()
+      setPlaying(true)
+    } else {
+      el.pause()
+      setPlaying(false)
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        autoPlay
+        loop
+        muted
+        playsInline
+        onClick={toggle}
+        style={{ width: '100%', height: 'auto', display: 'block', cursor: 'pointer' }}
+      />
+      <button
+        onClick={toggle}
+        aria-label={playing ? 'Pause video' : 'Play video'}
+        style={{
+          position: 'absolute',
+          top: rpx(12),
+          left: rpx(12),
+          width: rpx(28),
+          height: rpx(28),
+          borderRadius: '50%',
+          border: 'none',
+          background: 'rgba(0, 0, 0, 0.55)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
+        {playing ? (
+          <span style={{ display: 'flex', gap: rpx(3) }}>
+            <span style={{ width: rpx(3), height: rpx(11), background: 'white', borderRadius: rpx(1) }} />
+            <span style={{ width: rpx(3), height: rpx(11), background: 'white', borderRadius: rpx(1) }} />
+          </span>
+        ) : (
+          <span
+            style={{
+              width: 0,
+              height: 0,
+              borderTop: `${rpx(6)} solid transparent`,
+              borderBottom: `${rpx(6)} solid transparent`,
+              borderLeft: `${rpx(9)} solid white`,
+              marginLeft: rpx(2),
+            }}
+          />
+        )}
+      </button>
+    </div>
+  )
+}
+
 // Dense, text-heavy desktop screens (tutorial mode here) don't hold up
 // shrunk into a narrow scrolling filmstrip — the coach-mark copy just isn't
 // readable. This breaks a flow into a few small named beats (see
@@ -342,7 +438,7 @@ function ScreenFlow({ groups, onImageClick }) {
             style={{
               margin: 0,
               fontFamily: 'var(--font-sans)',
-              fontSize: rpx(13),
+              fontSize: rpx(17),
               fontWeight: 600,
               color: 'var(--color-text)',
             }}
@@ -367,7 +463,7 @@ function ScreenFlow({ groups, onImageClick }) {
                     style={{
                       margin: 0,
                       fontFamily: 'var(--font-sans)',
-                      fontSize: rpx(12),
+                      fontSize: rpx(14),
                       fontWeight: 500,
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
@@ -406,7 +502,7 @@ function PairedFlow({ groups, onImageClick }) {
             style={{
               margin: 0,
               fontFamily: 'var(--font-sans)',
-              fontSize: rpx(13),
+              fontSize: rpx(17),
               fontWeight: 600,
               color: 'var(--color-text)',
             }}
@@ -423,7 +519,7 @@ function PairedFlow({ groups, onImageClick }) {
                     style={{
                       margin: 0,
                       fontFamily: 'var(--font-sans)',
-                      fontSize: rpx(12),
+                      fontSize: rpx(14),
                       fontWeight: 500,
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
@@ -649,19 +745,10 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
           legislation
         </p>
 
-        {/* Hero — a real screen instead of a video, since there's no
-            product demo clip for this one yet. */}
+        {/* Hero — the same demo clip used for this project's hover preview
+            on the WORK grid, instead of a static screenshot. */}
         <div style={{ marginTop: rpx(28), width: '100%', maxWidth: rpx(760), border: '1px solid rgba(0, 0, 0, 0.15)', overflow: 'hidden' }}>
-          <ClickableImage
-            src="/home/ontario/live-regi-desktop/01-new-text-entry.png"
-            alt="Live REGi's draft analysis screen with a sample regulation pasted in"
-            onClick={() =>
-              setLightbox({
-                src: '/home/ontario/live-regi-desktop/01-new-text-entry.png',
-                alt: "Live REGi's draft analysis screen with a sample regulation pasted in",
-              })
-            }
-          />
+          <PlayableVideo src="/home/ontario/live-regi-demo.mp4" poster="/home/ontario/live-regi-demo-poster.jpg" />
         </div>
 
         {/* Metadata strip — a fixed grid of equal-width columns (not
@@ -729,11 +816,32 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
             be clearer before it ships.
           </p>
           <p style={{ margin: `${rpx(16)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(17), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.55)' }}>
-            Built for Ontario's Ministry of Red Tape Reduction, Live REGi is an AI tool policy advisors use
+            Built for Ontario's Ministry of Red Tape Reduction (MRTR), Live REGi is an AI tool policy advisors use
             to scan draft legislation and regulations for outdated references, overly complex phrasing, and
             regulatory compliance requirements, each flag explained rather than just handed over as a black
             box.
           </p>
+
+          {/* A quick preview of where this actually landed (full breakdown
+              in Results, further down) — real numbers this early instead of
+              asking the reader to wait for proof it works, sized to
+              actually catch the eye rather than read as a footnote. */}
+          <div style={{ marginTop: rpx(32), display: 'flex', flexWrap: 'wrap', gap: rpx(48) }}>
+            {[
+              { value: '94%', label: 'RCR detection accuracy' },
+              { value: '$1.4M', label: 'in costs already avoided' },
+              { value: '13,386 hrs', label: 'of OPS staff work saved' },
+            ].map((stat, i) => (
+              <div key={stat.label} style={{ paddingLeft: i === 0 ? 0 : rpx(48), borderLeft: i === 0 ? 'none' : HAIRLINE }}>
+                <p style={{ margin: 0, fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: rpx(48), lineHeight: 1.1, color: NAVY }}>
+                  {stat.value}
+                </p>
+                <p style={{ margin: `${rpx(6)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(15), color: 'rgba(0, 0, 0, 0.55)' }}>
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
         </motion.section>
 
         {/* Problem */}
@@ -853,12 +961,78 @@ export default function LiveRegiCaseStudy({ onBack, onNextProject, nextProjectLa
           </p>
         </motion.section>
 
+        {/* Results — an open, editorial stat layout instead of a wall of
+            filled cards: plain numbers with hairline dividers for the
+            projected figures, a checkmark list for the measured ones (same
+            pattern Bitesize's "What success looks like" uses), and the one
+            number that's already realized rather than projected pulled out
+            as its own line so the case study isn't implying more certainty
+            than each figure actually has. */}
+        <motion.section
+          {...REVEAL}
+          ref={(el) => {
+            sectionRefs.current[5] = el
+          }}
+          style={{ marginTop: rpx(72) }}
+        >
+          <Transition>Proof this actually works.</Transition>
+          <p style={{ margin: `${rpx(12)} 0 0 0`, maxWidth: rpx(820), fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.6)' }}>
+            The full breakdown behind the quick numbers up top: MRTR's own modeled savings first, since
+            REGi hasn't reached full maturity yet, then what testing actually measured against real policy
+            professionals.
+          </p>
+
+          <p style={{ margin: `${rpx(28)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(13), fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.4)' }}>
+            Projected savings
+          </p>
+          <div style={{ marginTop: rpx(16), maxWidth: rpx(1040), display: 'flex', flexWrap: 'wrap', gap: rpx(32) }}>
+            {IMPACT_STATS.map((stat) => (
+              <div key={stat.label} style={{ flex: '1 1 200px', paddingTop: rpx(14), borderTop: `2px solid ${NAVY}` }}>
+                <p style={{ margin: 0, fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: rpx(32), color: NAVY }}>
+                  {stat.value}
+                </p>
+                <p style={{ margin: `${rpx(8)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(14), lineHeight: 1.4, color: 'rgba(0, 0, 0, 0.6)' }}>
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ margin: `${rpx(32)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(13), fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(0, 0, 0, 0.4)' }}>
+            Measured accuracy
+          </p>
+          <div style={{ marginTop: rpx(14), display: 'flex', flexDirection: 'column', gap: rpx(12), maxWidth: rpx(820) }}>
+            {ACCURACY_STATS.map((stat) => (
+              <div key={stat.label} style={{ display: 'flex', gap: rpx(12), alignItems: 'baseline' }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: rpx(16), color: NAVY }}>✓</span>
+                <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.65)' }}>
+                  <strong style={{ fontWeight: 600, color: 'var(--color-text)' }}>{stat.value}</strong> {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* The one number here that isn't a projection — pulled out as
+              its own line, same left-border treatment as the "coming next"
+              callout in Reflection below, instead of another filled box. */}
+          <div style={{ marginTop: rpx(32), maxWidth: rpx(820), paddingLeft: rpx(24), borderLeft: `3px solid ${NAVY}` }}>
+            <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: rpx(16), color: 'var(--color-text)' }}>
+              Already realized, not projected.
+            </p>
+            <p style={{ margin: `${rpx(8)} 0 0 0`, fontFamily: 'var(--font-sans)', fontSize: rpx(16), lineHeight: 1.6, color: 'rgba(0, 0, 0, 0.6)' }}>
+              That accuracy has already let REGi re-baseline every regulatory compliance requirement across
+              Ontario's legislation, regulations, and forms, avoiding $1.4 million in costs and 13,386
+              hours of work for OPS staff.
+            </p>
+          </div>
+        </motion.section>
+
         {/* Reflection */}
         <div style={{ marginTop: rpx(96), maxWidth: rpx(820), borderTop: HAIRLINE }} />
         <motion.section
           {...REVEAL}
           ref={(el) => {
-            sectionRefs.current[5] = el
+            sectionRefs.current[6] = el
           }}
           style={{ marginTop: rpx(40) }}
         >

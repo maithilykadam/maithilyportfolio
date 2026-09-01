@@ -208,17 +208,17 @@ const EARLY_WORK_FRAMES = [
 // claims.
 const TAKEAWAYS = [
   {
-    icon: '🎯',
+    icon: '✓',
     title: 'Capturing and starting are different problems',
     body: 'Adding a task rewards speed: sets, a running checklist. Starting one rewards focus: one step, one screen. Two different flows, not one doing double duty.',
   },
   {
-    icon: '🗒️',
+    icon: '✓',
     title: 'One core object beats two',
     body: 'Quick notes are for anything too small to be a task on its own. Bundling a few into a real task, instead of a separate "promote" flow, kept the app to one object.',
   },
   {
-    icon: '✂️',
+    icon: '✓',
     title: 'Removing a feature can be the fix',
     body: 'The swipe gesture and the "up next" preview both felt reasonable on paper, but worked against the same goal: staying with one task, not bracing for the next. Cutting them taught as much as anything that shipped.',
   },
@@ -525,7 +525,7 @@ function Filmstrip({ frames, onImageClick }) {
                 style={{
                   margin: 0,
                   fontFamily: 'var(--font-sans)',
-                  fontSize: rpx(12),
+                  fontSize: rpx(14),
                   fontWeight: 500,
                   letterSpacing: '0.05em',
                   textTransform: 'uppercase',
@@ -1171,7 +1171,7 @@ export default function BitesizeCaseStudy({ onBack, onNextProject, nextProjectLa
           <div style={{ marginTop: rpx(36), display: 'flex', flexDirection: 'column', gap: rpx(28), maxWidth: rpx(820) }}>
             {TAKEAWAYS.map((takeaway) => (
               <div key={takeaway.title} style={{ display: 'flex', gap: rpx(16), alignItems: 'flex-start' }}>
-                <span style={{ fontSize: rpx(22), lineHeight: 1.4 }}>{takeaway.icon}</span>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: rpx(18), color: NAVY, lineHeight: 1.4 }}>{takeaway.icon}</span>
                 <div>
                   <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: rpx(19), color: 'var(--color-text)' }}>
                     {takeaway.title}

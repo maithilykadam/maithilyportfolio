@@ -2,19 +2,19 @@ import { motion } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
 
 // Keep in sync with the CATEGORIES export in WhoGallery.jsx — this is just
-// the label/icon for each pill; WhoGallery owns which photos actually
-// belong to each one.
+// the label for each pill; WhoGallery owns which photos actually belong to
+// each one. No emoji icons (dropped — not every device renders them the
+// same way, same reasoning as the case-study takeaway checkmarks).
 export const FILTERS = [
-  { id: 'all', label: 'ALL', icon: '•' },
-  { id: 'friends', label: 'FRIENDS', icon: '👥' },
-  { id: 'skies-nature', label: 'SKIES & NATURE', icon: '🌤' },
-  { id: 'concerts', label: 'CONCERTS', icon: '🎤' },
-  { id: 'volleyball', label: 'VOLLEYBALL', icon: '🏐' },
+  { id: 'all', label: 'ALL' },
+  { id: 'skies-nature', label: 'SKIES & NATURE' },
+  { id: 'concerts', label: 'CONCERTS' },
+  { id: 'volleyball', label: 'VOLLEYBALL' },
 ]
 
 /**
- * The bracketed filter pills sitting next to the WHO label — "[ ALL • ]",
- * "[ FRIENDS 👥 ]", etc. Clicking one swaps which photos WhoGallery shows
+ * The bracketed filter pills sitting next to the WHO label — "[ ALL ]",
+ * "[ CONCERTS ]", etc. Clicking one swaps which photos WhoGallery shows
  * (see the `category` prop threaded through WhoContent → WhoGallery) and
  * a short line of context about what that category means, instead of the
  * usual photo-set-per-scroll-gesture behaviour.
@@ -51,9 +51,7 @@ export default function WhoFilters({ value, onChange }) {
               whiteSpace: 'nowrap',
             }}
           >
-            <span>[ {filter.label}</span>
-            <span>{filter.icon}</span>
-            <span>]</span>
+            <span>[ {filter.label} ]</span>
           </motion.button>
         )
       })}

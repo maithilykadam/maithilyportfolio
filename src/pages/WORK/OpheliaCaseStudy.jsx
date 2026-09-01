@@ -724,7 +724,7 @@ export default function OpheliaCaseStudy({ onBack, onNextProject, nextProjectLab
           <div style={{ marginTop: rpx(32), maxWidth: rpx(820), border: HAIRLINE, borderRadius: rpx(12), overflow: 'hidden' }}>
             <img
               src="/home/ophelia/ophelia-brand-splash.png"
-              alt="Ophelia — Generation, directed by you"
+              alt="Ophelia: Generation, directed by you"
               style={{ width: '100%', height: 'auto', display: 'block' }}
             />
           </div>
@@ -966,7 +966,7 @@ export default function OpheliaCaseStudy({ onBack, onNextProject, nextProjectLab
                     style={{
                       margin: 0,
                       fontFamily: 'var(--font-sans)',
-                      fontSize: rpx(12),
+                      fontSize: rpx(14),
                       fontWeight: 500,
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',

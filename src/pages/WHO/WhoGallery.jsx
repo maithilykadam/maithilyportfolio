@@ -1,12 +1,8 @@
-import { useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { rpx } from '../../constants/responsive.js'
-import { MusicCard, FixationsCard, LocationCard } from './WhoWidgets.jsx'
+import { MusicCard } from './WhoWidgets.jsx'
 
 const WIDGETS = {
   music: MusicCard,
-  fixations: FixationsCard,
-  location: LocationCard,
 }
 
 // Real photos, served from public/who/. Each one keeps its own natural
@@ -46,8 +42,8 @@ function Widget({ kind }) {
 // 78, strip metadata) before landing here, or the page would ship tens of
 // megabytes of images.
 //
-// public/who/ is also split into per-category subfolders (friends/,
-// skies-nature/, concerts/, volleyball/) so the filter pills in
+// public/who/ is also split into per-category subfolders (skies-nature/,
+// concerts/, volleyball/) so the filter pills in
 // WhoFilters.jsx have something real to show — this map is just "which
 // subfolder is this filename in" so PHOTO() can find each one at its new
 // path. Anything not listed here is a leftover, uncategorized photo that
@@ -96,10 +92,6 @@ const CATEGORY_OF = {
   IMG_5950: 'concerts',
   IMG_5972: 'concerts',
   IMG_6012: 'concerts',
-  IMG_1332: 'friends',
-  IMG_7655: 'friends',
-  IMG_8836: 'friends',
-  SAM_6599: 'friends',
   '052222_0400': 'volleyball',
   '052222_0493': 'volleyball',
   '052222_0547': 'volleyball',
@@ -128,9 +120,6 @@ const PHOTO = (name) => {
   const folder = CATEGORY_OF[name]
   return folder ? `/who/${folder}/opt-${name}.jpg` : `/who/opt-${name}.jpg`
 }
-
-// The photos for each filter pill, grouped by category folder.
-const FRIENDS_PHOTOS = ['IMG_1332', 'IMG_7655', 'IMG_8836', 'SAM_6599'].map((name) => ({ src: PHOTO(name) }))
 
 // Deliberately interleaved (not "old photos, then new photos") so a
 // recently-added batch doesn't all cluster into the last set or two — each
@@ -210,7 +199,6 @@ const VOLLEYBALL_PHOTOS = [
 ].map((name) => ({ src: PHOTO(name) }))
 
 const CATEGORY_PHOTOS = {
-  friends: FRIENDS_PHOTOS,
   'skies-nature': SKIES_PHOTOS,
   concerts: CONCERTS_PHOTOS,
   volleyball: VOLLEYBALL_PHOTOS,
@@ -219,22 +207,26 @@ const CATEGORY_PHOTOS = {
 // A line of context for each category — shown above the filtered photo
 // grid so a category reads as more than just a photo dump.
 const CATEGORY_CONTEXT = {
-  friends: 'The people who make it feel like home — campus events, color runs, and everything shared with the people around me.',
-  'skies-nature': 'Sunsets, skylines, and the outdoors — where I go to slow down and reset.',
-  concerts: 'Live music, from stadium shows to festival stages — some of my favourite nights out.',
+  'skies-nature': 'Sunsets, skylines, and the outdoors, where I go to slow down and reset.',
+  concerts: 'Live music, from stadium shows to festival stages, some of my favourite nights out.',
   volleyball:
     'Volleyball is such an important part of my life, and it has taught me so much about myself and how to navigate the world.',
 }
 
-// A handful of real photos that were never sorted into one of the four
+// Same idea as CATEGORY_CONTEXT above, but for the default ("all") view —
+// shown above the full mixed feed so it reads as one intentional set
+// rather than an unlabeled dump of every category at once.
+const ALL_CONTEXT = 'A bit of everything, all mixed together: concerts, sunsets, volleyball, and the moments in between.'
+
+// A handful of real photos that were never sorted into one of the three
 // categories above (still just sitting at the folder root).
 const UNCATEGORIZED_PHOTOS = ['IMG_0316', 'IMG_1480', 'IMG_5158', 'IMG_5253', 'IMG_5633'].map((name) => ({
   src: PHOTO(name),
 }))
 
 // Round-robins across several photo lists at once — one from each group per
-// pass — so ALL isn't "every friends photo, then every skies photo, then
-// every concert photo, ...", it's a genuine mix of everything throughout.
+// pass — so ALL isn't "every skies photo, then every concert photo, then
+// every volleyball photo, ...", it's a genuine mix of everything throughout.
 function interleave(groups) {
   const result = []
   const longest = Math.max(...groups.map((g) => g.length))
@@ -246,20 +238,11 @@ function interleave(groups) {
   return result
 }
 
-// The caption and the three widget cards (currently-on-repeat song,
-// current fixations, location — see WhoWidgets.jsx) spread evenly through
-// the interleaved photo list below, rather than all clustered at the very
-// start, so ALL still has that personal-Pinterest-board mix of photos and
-// "cards" throughout, not just in set one.
-const ALL_SPECIAL_ITEMS = [
-  {
-    caption:
-      'Volleyball is such an important part of my life, and it has taught me so much about myself and how to navigate the world',
-  },
-  { widget: 'fixations' },
-  { widget: 'music' },
-  { widget: 'location' },
-]
+// The one widget card (currently-on-repeat song — see WhoWidgets.jsx)
+// spread into the interleaved photo list below, rather than clustered at
+// the very start, so ALL still has that personal-Pinterest-board mix of
+// photos and "cards" throughout, not just in set one.
+const ALL_SPECIAL_ITEMS = [{ widget: 'music' }]
 
 function withSpecialItemsSpread(photos, specials) {
   const result = [...photos]
@@ -271,12 +254,11 @@ function withSpecialItemsSpread(photos, specials) {
 }
 
 // Every real photo across every category, plus the leftovers, interleaved
-// and with the caption/widget cards spread through — this is the full
-// "everything" view, auto-chunked into same-density scroll-to-page sets by
-// chunkIntoSets below (see PagedGallery) rather than a hand-picked pair of
-// sets, so it automatically grows as more photos get added to any folder.
+// and with the widget card spread through — this is the full "everything"
+// list, rendered by ScrollingGallery below — so it automatically grows as
+// more photos get added to any folder.
 const ALL_ITEMS = withSpecialItemsSpread(
-  interleave([FRIENDS_PHOTOS, SKIES_PHOTOS, CONCERTS_PHOTOS, VOLLEYBALL_PHOTOS, UNCATEGORIZED_PHOTOS]),
+  interleave([SKIES_PHOTOS, CONCERTS_PHOTOS, VOLLEYBALL_PHOTOS, UNCATEGORIZED_PHOTOS]),
   ALL_SPECIAL_ITEMS,
 )
 
@@ -286,202 +268,69 @@ function GalleryItem({ item }) {
   return <Photo src={item.src} />
 }
 
-// `registerLastItem`, if given, is called with the DOM node of the LAST
-// item in each column — that's the one PagedGallery measures to decide
-// whether this column ran past the visible area (see the clip-detection
-// note on PagedGallery below).
-function GalleryPage({ columns, registerLastItem }) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: rpx(16),
-      }}
-    >
-      {/* Each column fades/slides in on its own, staggered by index — the
-          left column starts almost immediately and each one after it
-          lags a bit more, so the whole set sweeps in left-to-right rather
-          than appearing all at once. Exit is quick and uniform (no
-          stagger) so the outgoing set clears cleanly before the next one
-          sweeps in. */}
-      {columns.map((column, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 22 }}
-          animate={{ opacity: 1, y: 0, transition: { duration: 0.9, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] } }}
-          exit={{ opacity: 0, transition: { duration: 0.35, ease: [0.4, 0, 1, 1] } }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: rpx(16),
-            flex: '1 1 0',
-            minWidth: 0,
-            // Clearance for Resume/the bottom nav is reserved further up,
-            // in WhoContent's own bottom padding — that's what actually
-            // shrinks the height available to this whole gallery so its
-            // content naturally stops short of them. Padding added here,
-            // after content that already fills 100% of the (unshrunk)
-            // available height, would just get clipped by the panel's
-            // `overflow: hidden` instead of ever being visible.
-          }}
-        >
-          {column.map((item, j) => (
-            <div key={j} ref={j === column.length - 1 ? registerLastItem?.(i) : undefined}>
-              <GalleryItem item={item} />
-            </div>
-          ))}
-        </motion.div>
-      ))}
-    </div>
-  )
-}
-
 /**
- * The shared scroll-to-page mechanic used by every view in this gallery
- * (ALL and every filtered category alike): you see one set, and a scroll/
- * trackpad gesture over the gallery pages to a completely different set —
- * current set fades out, next set fades in — rather than moving the page.
- * `e.preventDefault()` on the wheel event stops the browser's own scroll
- * from ever kicking in. Each photo keeps its own natural aspect ratio
- * (fixed column width, height whatever that implies) rather than being
- * cropped to a preset box.
+ * A plain, continuously-scrolling masonry — replaces the old PagedGallery
+ * (a wheel gesture swapping in a whole new hand-chunked set, no real
+ * scrollbar, with clip-detection logic to carry cut-off photos over to the
+ * next set). That made sense when the gallery was the entire panel; now
+ * that it shares the row with the bio column (see WhoContent.jsx) and has
+ * less width to work with, a real vertical scroll reads better than a "one
+ * gesture = one whole new set" swap.
  *
- * Clip carry-over: right before paging, this actually measures (via refs
- * and getBoundingClientRect) whether the last photo in each column ran
- * past the visible bottom edge. Only photos that were genuinely cut off
- * get carried over — placed at the very top of that same column on the
- * next set — instead of blindly repeating the boundary photo every time
- * whether it needed it or not.
+ * Two false starts before landing here:
+ *   1. CSS multi-column (`columnCount`) with the scroll-bounding
+ *      (`position: absolute; inset: 0`) on the SAME element as the
+ *      columns. That was the actual mistake, not multi-column itself —
+ *      capping an element's height while also asking it to lay out N
+ *      columns forces the spec's overflow behavior to kick in: instead of
+ *      making the columns taller, it adds MORE columns further to the
+ *      right, which `overflowX: hidden` was then silently clipping.
+ *      Photos were disappearing with nothing to scroll.
+ *   2. Manually round-robining items into a fixed number of real flexbox
+ *      columns (item i into column i % 3) to sidestep that. Fixed the
+ *      scrolling, but round-robin-by-count doesn't know anything about
+ *      each photo's actual height, so a column that happened to land a
+ *      run of short/landscape photos finished far short of its
+ *      neighbors — a big blank gap at its bottom for the rest of the
+ *      scroll. Swapping that for a plain CSS grid (row-major fill) traded
+ *      one big gap for a smaller version of the same problem in every
+ *      single row instead — still not a real masonry.
  *
- * One physical scroll gesture = one page change, wrapping around at the
- * ends (last set → back to the first, and vice versa). A single trackpad
- * swipe fires many wheel events over its whole duration, not just one — a
- * fixed timed lock (e.g. "ignore events for 700ms") isn't reliable because
- * a slow or lingering swipe can easily outlast that and trigger a second
- * advance before the user's hand has even left the trackpad. Instead this
- * only acts on the FIRST event of a gesture, then re-arms an idle timer on
- * every subsequent event; the lock only lifts once wheel input has
- * actually stopped for a beat, however long the gesture itself took.
- *
- * With just one set (as any lightly-populated category will have), the
- * wheel handler still runs but paging wraps to itself — same feature,
- * nothing to page to yet.
+ * The fix is CSS multi-column after all — `columnCount` is what actually
+ * balances column heights evenly (real masonry) and grows the container to
+ * fit, but ONLY when its own height is left unconstrained. So the two
+ * concerns are now on two different elements: an outer wrapper owns the
+ * scroll bounding (`position: absolute; inset: 0`, `overflowY: auto`), and
+ * the inner element owns the columns with no height set on it at all —
+ * free to grow as tall as it needs so the browser can balance it properly,
+ * while the outer wrapper scrolls through that.
  */
-function PagedGallery({ sets }) {
-  const columnCount = sets[0]?.length ?? 0
-  const [page, setPage] = useState(0)
-  const [carry, setCarry] = useState(() => Array(columnCount).fill(null))
-  const lockedRef = useRef(false)
-  const idleTimerRef = useRef(null)
-  const containerRef = useRef(null)
-  const lastItemRefs = useRef([])
-
-  const registerLastItem = (colIndex) => (el) => {
-    lastItemRefs.current[colIndex] = el
-  }
-
-  // Any photo whose carried-over item, if present, gets stitched onto the
-  // front of that column before rendering.
-  const displayedColumns = sets[page].map((column, i) => (carry[i] ? [carry[i], ...column] : column))
-
-  const goToPage = (direction) => {
-    const containerBottom = containerRef.current?.getBoundingClientRect().bottom
-    const nextCarry = displayedColumns.map((column, i) => {
-      const el = lastItemRefs.current[i]
-      if (!el || !containerBottom || column.length === 0) return null
-      const clipped = el.getBoundingClientRect().bottom > containerBottom + 1
-      return clipped ? column[column.length - 1] : null
-    })
-    setCarry(nextCarry)
-    setPage((current) => (current + direction + sets.length) % sets.length)
-  }
-
-  const handleWheel = (e) => {
-    e.preventDefault()
-
-    // Any wheel activity pushes the "gesture is still happening" window
-    // back out, regardless of whether this event caused a page change.
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
-    idleTimerRef.current = setTimeout(() => {
-      lockedRef.current = false
-    }, 400)
-
-    if (lockedRef.current) return
-    const direction = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0
-    if (direction === 0) return
-    lockedRef.current = true
-    goToPage(direction)
-  }
-
+function ScrollingGallery({ items, columns = 3 }) {
   return (
-    <div
-      ref={containerRef}
-      onWheel={handleWheel}
-      style={{
-        position: 'relative',
-        flex: '1 1 auto',
-        minHeight: 0,
-        overflow: 'hidden',
-      }}
-    >
-      <AnimatePresence mode="wait">
-        <GalleryPage key={page} columns={displayedColumns} registerLastItem={registerLastItem} />
-      </AnimatePresence>
+    <div data-cursor-hover="scroll" style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+      <div style={{ columnCount: columns, columnGap: rpx(16) }}>
+        {items.map((item, i) => (
+          <div key={i} style={{ breakInside: 'avoid', marginBottom: rpx(16) }}>
+            <GalleryItem item={item} />
+          </div>
+        ))}
+      </div>
     </div>
   )
-}
-
-// Splits a flat list of photo items into masonry "sets" for PagedGallery —
-// each set is `columns` columns of up to `perColumn` photos, round-robin,
-// the same density the hand-arranged ALL sets use. A category with more
-// photos than one set holds naturally spills into a second (third, ...)
-// set, paged the same way as ALL. (Clip carry-over between sets happens at
-// render time in PagedGallery, not here.)
-function chunkIntoSets(items, { columns = 5, perColumn = 2 } = {}) {
-  const perSet = columns * perColumn
-  const sets = []
-  for (let start = 0; start < items.length; start += perSet) {
-    const chunk = items.slice(start, start + perSet)
-    const cols = Array.from({ length: columns }, () => [])
-    chunk.forEach((item, i) => cols[i % columns].push(item))
-    sets.push(cols)
-  }
-  return sets.length > 0 ? sets : [Array.from({ length: columns }, () => [])]
 }
 
 /**
  * The default ("all") view — every real photo across every category
- * (Friends, Skies & Nature, Concerts, Volleyball) plus the leftovers, the
- * caption, and the three real "widget" cards (currently-on-repeat song,
- * current fixations, location — see WhoWidgets.jsx), all interleaved and
- * auto-chunked into scroll-to-page sets by chunkIntoSets. Paged via
- * PagedGallery above — grows automatically as more photos land in any of
- * the category folders, no manual re-authoring needed.
+ * (Skies & Nature, Concerts, Volleyball) plus the leftovers, and the real
+ * "widget" card (currently-on-repeat song — see WhoWidgets.jsx), all
+ * interleaved and
+ * scrolling continuously via ScrollingGallery — grows automatically as more
+ * photos land in any of the category folders, no manual re-authoring
+ * needed.
  */
 function AllPhotosView() {
-  const sets = chunkIntoSets(ALL_ITEMS)
   return (
-    <div style={{ flex: '1 1 auto', minHeight: 0, marginTop: rpx(32), display: 'flex' }}>
-      <PagedGallery sets={sets} />
-    </div>
-  )
-}
-
-/**
- * A single filtered category view (Friends, Skies & Nature, Volleyball) —
- * a line of context about what the category means, then the same
- * scroll-to-page masonry as the ALL view, just built from only that
- * category's photos (chunked into same-density sets by chunkIntoSets).
- */
-function CategoryView({ category }) {
-  const photos = CATEGORY_PHOTOS[category] ?? []
-  const sets = chunkIntoSets(photos)
-
-  return (
-    <div style={{ flex: '1 1 auto', minHeight: 0, marginTop: rpx(32), display: 'flex', flexDirection: 'column' }}>
+    <div style={{ flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <p
         style={{
           margin: `0 0 ${rpx(20)} 0`,
@@ -489,7 +338,37 @@ function CategoryView({ category }) {
           fontSize: rpx(16),
           lineHeight: 1.4,
           color: 'rgba(0, 0, 0, 0.6)',
-          maxWidth: rpx(700),
+          flexShrink: 0,
+        }}
+      >
+        {ALL_CONTEXT}
+      </p>
+
+      <div style={{ flex: '1 1 auto', minHeight: 0, position: 'relative' }}>
+        <ScrollingGallery items={ALL_ITEMS} />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A single filtered category view (Skies & Nature, Concerts, Volleyball) —
+ * a line of context about what the category means, then the same
+ * continuously-scrolling masonry as the ALL view, just built from only
+ * that category's photos.
+ */
+function CategoryView({ category }) {
+  const photos = CATEGORY_PHOTOS[category] ?? []
+
+  return (
+    <div style={{ flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <p
+        style={{
+          margin: `0 0 ${rpx(20)} 0`,
+          fontFamily: 'var(--font-sans)',
+          fontSize: rpx(16),
+          lineHeight: 1.4,
+          color: 'rgba(0, 0, 0, 0.6)',
           flexShrink: 0,
         }}
       >
@@ -501,7 +380,9 @@ function CategoryView({ category }) {
           Photos coming soon.
         </p>
       ) : (
-        <PagedGallery sets={sets} />
+        <div style={{ flex: '1 1 auto', minHeight: 0, position: 'relative' }}>
+          <ScrollingGallery items={photos} />
+        </div>
       )}
     </div>
   )

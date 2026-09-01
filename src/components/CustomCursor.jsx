@@ -32,6 +32,20 @@ function ArrowUpRightIcon({ size = 14 }) {
   )
 }
 
+// A vertical line with an arrowhead at each end — used by the `scroll`
+// badge over the WHO gallery (see WhoGallery.jsx's ScrollingGallery) to
+// flag that the photos scroll vertically, since that area has no visible
+// scrollbar hint of its own otherwise.
+function ScrollIcon({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25">
+      <path d="M12 5v14" strokeLinecap="round" />
+      <path d="M8 9l4-4 4 4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 15l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 // `button` (every other clickable — links, nav words, resume, etc.) uses
 // the same soft/translucent language on the ring rather than a solid
 // opaque stroke — a solid ring was cutting right across small link text.
@@ -40,6 +54,7 @@ const DOT_VARIANTS = {
   ring: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
   button: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
   expand: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
+  scroll: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
   invert: { width: DOT_SIZE, height: DOT_SIZE, opacity: 0 },
 }
 
@@ -47,6 +62,7 @@ const RING_VARIANTS = {
   default: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
   ring: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
   expand: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
+  scroll: { width: 0, height: 0, opacity: 0, border: `1.5px solid rgba(30, 58, 138, 0)` },
   button: {
     width: RING_SIZE_BUTTON,
     height: RING_SIZE_BUTTON,
@@ -89,6 +105,10 @@ const RING_VARIANTS = {
  *     cleanly without constantly overlapping its neighbors (the
  *     playground pieces) — a small solid navy circle with a plain
  *     diagonal arrow, no label.
+ *   scroll — the WHO photo gallery specifically, which has no native
+ *     scrollbar hint visible: a labeled pill (same treatment as `ring`'s
+ *     "VIEW CASE STUDY" pill), icon + "SCROLL" — a plain icon-only badge
+ *     read as too small/unclear on its own.
  *
  * All three layers sit in one positioned wrapper that tracks the pointer,
  * so they're always concentric regardless of which is visible — centered
@@ -155,6 +175,7 @@ export default function CustomCursor() {
 
   const isPill = variant === 'ring'
   const isBadge = variant === 'expand'
+  const isScrollBadge = variant === 'scroll'
 
   return (
     <motion.div
@@ -251,6 +272,44 @@ export default function CustomCursor() {
         }}
       >
         <ArrowUpRightIcon size={14} />
+      </motion.div>
+
+      {/* Scroll pill — hovering the WHO photo gallery (see WhoGallery.jsx's
+          ScrollingGallery), which has no visible scrollbar hint of its
+          own. Upgraded from a small icon-only circle (read as too subtle/
+          unclear) to the same labeled-pill treatment as the case-study
+          hover, so it's unmistakable rather than just a vague badge. */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: isScrollBadge ? 1 : 0, scale: isScrollBadge ? 1 : 0.8 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          translate: '-50% -50%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '7px 14px',
+          borderRadius: '999px',
+          background: NAVY,
+          color: '#ffffff',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 8px 24px rgba(30, 58, 138, 0.3)',
+        }}
+      >
+        <ScrollIcon size={16} />
+        <span
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+          }}
+        >
+          SCROLL
+        </span>
       </motion.div>
     </motion.div>
   )
