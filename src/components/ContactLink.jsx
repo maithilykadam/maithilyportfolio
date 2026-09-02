@@ -147,7 +147,16 @@ export default function ContactLink({ active }) {
             alignItems: 'center',
             gap: rpx(6),
             padding: `${rpx(8)} ${rpx(14)}`,
-            margin: `${rpx(-8)} ${rpx(-14)}`,
+            // Vertical-only canceling margin now — the horizontal half
+            // used to cancel the left/right padding too, which let this
+            // pill's real (padded) width bleed past its own flex-item box
+            // on the right. Since Email/LinkedIn's pills (no canceling
+            // margin at all — see ContactOption above) align their real
+            // full width to the container's right edge, that bleed put
+            // Contact's pill rpx(14) further right than both of them.
+            // Letting the horizontal padding count for real here fixes
+            // that: all three now align flush on the same right edge.
+            margin: `${rpx(-8)} 0`,
             borderRadius: '999px',
             border: '1px solid rgba(0, 0, 0, 0.12)',
           }}

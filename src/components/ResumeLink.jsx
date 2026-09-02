@@ -10,12 +10,12 @@ import { rpx, rvh } from '../constants/responsive.js'
  *
  * Same adaptive fill as the bottom nav (see BottomStepper.jsx), now on
  * every panel including HOME — the pill picks up a resting backgroundColor
- * of the page's own background, legible over whatever's running
- * underneath it. Hovering shows a subtle neutral gray tint regardless of
- * panel, and "Resume" + the arrow scale up together slightly as one group
- * (not just the arrow nudging off on its own); the needsFill background
- * only shows up when NOT hovered, so the hover state always reads the same
- * everywhere.
+ * of the page's own background, legible over whatever's running underneath
+ * it. Hover state now matches ContactLink.jsx's pill exactly (same navy
+ * tint, same 1.12 scale on the whole pill as one unit — text and arrow
+ * move together because they're inside it, neither animates on its own);
+ * the needsFill background only shows up when NOT hovered, so the hover
+ * state always reads the same everywhere.
  *
  * Points at the resume hosted on Google Drive, opened in a new tab so
  * clicking it never navigates away from the site itself.
@@ -59,14 +59,15 @@ export default function ResumeLink({ active }) {
     >
       <motion.span
         animate={{
+          scale: hovered ? 1.12 : 1,
           backgroundColor: hovered
-            ? 'rgba(0, 0, 0, 0.06)'
+            ? 'rgba(30, 58, 138, 0.1)'
             : needsFill
               ? 'var(--color-bg)'
-              : 'rgba(0, 0, 0, 0)',
+              : 'rgba(30, 58, 138, 0)',
           boxShadow: needsFill && !hovered ? '0 1px 8px rgba(0, 0, 0, 0.08)' : '0 0 0 rgba(0, 0, 0, 0)',
         }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
         style={{
           position: 'relative',
           display: 'inline-flex',
@@ -78,17 +79,11 @@ export default function ResumeLink({ active }) {
           border: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
-        {/* Only "Resume" itself scales up on hover now — the arrow stays
-            static (same call as the Contact pill's arrow: no motion of its
-            own, just along for the ride visually as part of the pill). */}
+        {/* Neither "Resume" nor the arrow animate individually — the pill
+            around them (above) scales and tints as one unit on hover,
+            same treatment as the Contact pill. */}
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: rpx(6) }}>
-          <motion.span
-            animate={{ scale: hovered ? 1.08 : 1 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            style={{ display: 'inline-block', transformOrigin: 'left center' }}
-          >
-            Resume
-          </motion.span>
+          <span>Resume</span>
           {/* Custom arrow instead of the ↗ glyph — short, thin stem with a
               chunkier, larger arrowhead corner (two thicker strokes) rather
               than the default character's thin, overlong tail. */}
