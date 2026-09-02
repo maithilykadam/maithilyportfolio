@@ -267,8 +267,8 @@ export default function Shell({ active }) {
             <div style={{ position: 'relative', width: '100vw', height: '100%', overflow: 'hidden auto', paddingBottom: '24px' }}>
               <HomeMobile
                 onWho={() => jumpTo('who')}
-                onOphelia={goToProject('ophelia-ai-interface')}
-                onLiveRegi={goToProject('serviceontario-integration')}
+                onOphelia={goToProject('ophelia-ai-canvas')}
+                onLiveRegi={goToProject('regi-internal-tool')}
                 onBitesize={goToProject('bitesize')}
                 onOMHS={goToProject('oakville-milton-humane-society')}
               />
@@ -296,8 +296,8 @@ export default function Shell({ active }) {
               >
                 <WorkHomeContent
                   onNavigate={goTo('/work')}
-                  onNavigateToOphelia={goToProject('ophelia-ai-interface')}
-                  onNavigateToLiveRegi={goToProject('serviceontario-integration')}
+                  onNavigateToOphelia={goToProject('ophelia-ai-canvas')}
+                  onNavigateToLiveRegi={goToProject('regi-internal-tool')}
                   onNavigateToOMHS={goToProject('oakville-milton-humane-society')}
                 />
               </div>

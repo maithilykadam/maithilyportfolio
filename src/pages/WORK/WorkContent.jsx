@@ -19,22 +19,18 @@ import CaseStudyNotReadyMobile from './CaseStudyNotReadyMobile.jsx'
 // longer capped at 4 the way the old fixed-height bento was — this list is
 // meant to just keep growing as more real case studies get written up (see
 // the scrolling note below).
-const WORK_GRID_IDS = [
-  'ophelia-ai-interface',
-  'serviceontario-integration',
-  'bitesize',
-  'oakville-milton-humane-society',
-  'orbit-mobile-design',
-]
+// Orbit Mobile Design pulled out of this list for now, per request — it
+// stays defined in projects.js (so nothing's lost, same reasoning as the
+// comment above), just not one of the ids rendered into a grid slot below.
+// Swap it back in with a one-line change here whenever it's ready again.
+const WORK_GRID_IDS = ['ophelia-ai-canvas', 'regi-internal-tool', 'bitesize', 'oakville-milton-humane-society']
 // Real projects that don't have a written-up case study yet — their boxes
 // stay in the grid (so the layout doesn't shift once they're ready) but
 // read as inactive and not clickable (see `comingSoon` on PreviewBox
-// below). Each gets its own small playful line instead of a flat "coming
-// soon" repeated twice — Orbit gets a space pun off its own name, a nice
-// bit of "in on the joke" personality rather than a generic placeholder.
-const COMING_SOON_LINES = {
-  'orbit-mobile-design': 'Still in orbit, hasn’t landed yet 🚀',
-}
+// below). Empty for now — Orbit was the one entry here, and it's been
+// pulled out of WORK_GRID_IDS above entirely rather than shown as a
+// "Coming Soon" box.
+const COMING_SOON_LINES = {}
 
 const SLOTS = WORK_GRID_IDS.map((id, i) => {
   const project = PROJECTS.find((p) => p.id === id)
@@ -57,7 +53,7 @@ const SLOTS = WORK_GRID_IDS.map((id, i) => {
 // WorkHomeContent.jsx) — reused here by id rather than duplicated data, so
 // swapping either video in one place keeps both spots in sync.
 const VIDEO_BY_ID = {
-  'ophelia-ai-interface': { src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' },
+  'ophelia-ai-canvas': { src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' },
   bitesize: { src: '/home/bitesize/bitesize-demo.mp4', poster: '/home/bitesize/bitesize-demo-poster.jpg' },
   'oakville-milton-humane-society': {
     src: '/home/humanesociety/humanesociety-demo.mp4',
@@ -68,7 +64,7 @@ const VIDEO_BY_ID = {
   // (`cover` in a too-narrow box), its box gets its own wider aspectRatio
   // below — matching the video's real proportions closely enough that
   // `cover` barely has to crop anything.
-  'serviceontario-integration': {
+  'regi-internal-tool': {
     src: '/home/ontario/live-regi-demo.mp4',
     poster: '/home/ontario/live-regi-demo-poster.jpg',
     aspectRatio: '1266 / 648',
@@ -159,6 +155,33 @@ function PreviewBox({ slot, onOpen }) {
         )}
         {image && (
           <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+        )}
+        {/* "Case Study" tag — same bottom-right treatment as the landing
+            page's preview boxes (see WorkHomeContent.jsx), so a box reads
+            the same way whether it's found here or on the home page.
+            Skipped on `disabled` (Coming Soon) boxes — those aren't case
+            studies yet, so the tag would be misleading. */}
+        {!disabled && (
+          <span
+            style={{
+              position: 'absolute',
+              right: rpx(12),
+              bottom: rpx(10),
+              padding: `${rpx(4)} ${rpx(10)}`,
+              borderRadius: '999px',
+              background: 'rgba(0, 0, 0, 0.45)',
+              backdropFilter: 'blur(4px)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: rpx(11),
+              fontWeight: 500,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+              pointerEvents: 'none',
+            }}
+          >
+            Case Study
+          </span>
         )}
         {disabled && (
           <div
@@ -264,7 +287,7 @@ function PreviewBox({ slot, onOpen }) {
  * it exactly. (App.jsx still treats any /work/* path as the same "work"
  * section for the flip-panel transition — only this component cares about
  * the second path segment.) The home page's Ophelia box, for instance,
- * links straight to /work/ophelia-ai-interface (see Shell.jsx's
+ * links straight to /work/ophelia-ai-canvas (see Shell.jsx's
  * `goToProject`) so clicking it opens directly into that case study
  * instead of dropping onto the grid first.
  */
@@ -303,14 +326,14 @@ export default function WorkContent() {
   // content) instead of the generic darkened-overlay placeholder — so it
   // skips this container's own padding (its sidebar/content each manage
   // their own) and is handled as its own branch below.
-  const isOphelia = openSlot?.id === 'ophelia-ai-interface'
+  const isOphelia = openSlot?.id === 'ophelia-ai-canvas'
   // Bitesize also gets its own bespoke case-study page now (see
   // BitesizeCaseStudy.jsx) instead of the generic data-driven placeholder,
   // same reasoning as Ophelia above.
   const isBitesize = openSlot?.id === 'bitesize'
   // Live REGi also gets its own bespoke case-study page (see
   // LiveRegiCaseStudy.jsx) — same reasoning as Ophelia/Bitesize above.
-  const isLiveRegi = openSlot?.id === 'serviceontario-integration'
+  const isLiveRegi = openSlot?.id === 'regi-internal-tool'
   // OMHS also gets its own bespoke case-study page now (see
   // OMHSCaseStudy.jsx) instead of the generic placeholder — same reasoning
   // as Ophelia/Bitesize/Live REGi above.
@@ -393,12 +416,12 @@ export default function WorkContent() {
               <CaseStudyNotReadyMobile
                 title="Bitesize"
                 onBack={() => navigate('/')}
-                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-canvas')}
               />
             ) : (
               <BitesizeCaseStudy
                 onBack={() => navigate('/work')}
-                onNextProject={() => navigate('/work/serviceontario-integration')}
+                onNextProject={() => navigate('/work/regi-internal-tool')}
                 nextProjectLabel="Live REGi"
               />
             )}
@@ -415,7 +438,7 @@ export default function WorkContent() {
               <CaseStudyNotReadyMobile
                 title="Live REGi"
                 onBack={() => navigate('/')}
-                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-canvas')}
               />
             ) : (
               <LiveRegiCaseStudy
@@ -437,12 +460,12 @@ export default function WorkContent() {
               <CaseStudyNotReadyMobile
                 title="Oakville & Milton Humane Society"
                 onBack={() => navigate('/')}
-                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-canvas')}
               />
             ) : (
               <OMHSCaseStudy
                 onBack={() => navigate('/work')}
-                onNextProject={() => navigate('/work/ophelia-ai-interface')}
+                onNextProject={() => navigate('/work/ophelia-ai-canvas')}
                 nextProjectLabel="Ophelia"
               />
             )}
@@ -459,13 +482,13 @@ export default function WorkContent() {
               <CaseStudyNotReadyMobile
                 title={openSlot.title}
                 onBack={() => navigate('/')}
-                onViewOphelia={() => navigate('/work/ophelia-ai-interface')}
+                onViewOphelia={() => navigate('/work/ophelia-ai-canvas')}
               />
             ) : (
               <PlaceholderCaseStudy
                 {...placeholderCaseStudy}
                 onBack={() => navigate('/work')}
-                onNextProject={() => navigate('/work/ophelia-ai-interface')}
+                onNextProject={() => navigate('/work/ophelia-ai-canvas')}
                 nextProjectLabel="Ophelia"
               />
             )}

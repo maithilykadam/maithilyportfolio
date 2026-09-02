@@ -17,7 +17,7 @@ const ROLES = ['engineering @ waterloo', 'experience design @ ontario government
 // box), so there's nothing for a mobile card to link to.
 const FEATURED_PROJECTS = [
   {
-    title: 'Ophelia AI Interface',
+    title: 'Ophelia - AI Canvas',
     video: { src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' },
     navKey: 'ophelia',
   },
@@ -77,6 +77,29 @@ function ProjectCard({ title, video, onClick }) {
           playsInline
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
+        {/* "Case Study" tag — bottom-right corner of the video box itself,
+            same treatment as WorkHomeContent.jsx's desktop boxes, just
+            fixed px instead of rpx() (small text like this is exactly
+            where rpx() degenerates on a phone — see useIsMobile.js). */}
+        <span
+          style={{
+            position: 'absolute',
+            right: '10px',
+            bottom: '8px',
+            padding: '3px 9px',
+            borderRadius: '999px',
+            background: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(4px)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '10px',
+            fontWeight: 500,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+          }}
+        >
+          Case Study
+        </span>
       </div>
       <p
         style={{

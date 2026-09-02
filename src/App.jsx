@@ -14,7 +14,7 @@ const ACTIVE_BY_PATH = {
 // page unmounting/remounting on navigation.
 //
 // Matched on just the first path segment (not the full pathname) so a real
-// case-study route like /work/ophelia-ai-interface still resolves to the
+// case-study route like /work/ophelia-ai-canvas still resolves to the
 // "work" section — same flip panel, no re-flip when moving between the
 // grid and a case study, just a different sub-path within it. See
 // WorkContent.jsx, which reads that second segment itself to know which

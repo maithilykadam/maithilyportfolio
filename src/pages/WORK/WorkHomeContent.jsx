@@ -65,6 +65,32 @@ function PlaceholderBox({ area, onClick, video, image, title }) {
           />
         )}
         {image && <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />}
+        {/* "Case Study" tag — bottom-right corner of the box itself (not
+            the caption row below), so it reads as a label on the preview
+            image, the way a photo credit or format tag sits in the corner
+            of a thumbnail. Plain later sibling in a position:relative
+            parent, so it stacks above the video/image with no z-index
+            needed. */}
+        <span
+          style={{
+            position: 'absolute',
+            right: rpx(12),
+            bottom: rpx(10),
+            padding: `${rpx(4)} ${rpx(10)}`,
+            borderRadius: '999px',
+            background: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(4px)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: rpx(11),
+            fontWeight: 500,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+            pointerEvents: 'none',
+          }}
+        >
+          Case Study
+        </span>
       </div>
       {title && (
         <p
@@ -161,7 +187,7 @@ export default function WorkHomeContent({ onNavigate, onNavigateToOphelia, onNav
           area="top"
           onClick={onNavigateToOphelia}
           video={{ src: '/home/ophelia/ophelia-demo-6.mp4', poster: '/home/ophelia/ophelia-demo-6-poster.jpg' }}
-          title="Ophelia AI Interface"
+          title="Ophelia - AI Canvas"
         />
         {/* REGi sits in "bottomRight" (the wider 1.4fr column) rather than
             "bottomLeft" — its recording is noticeably wider than the other

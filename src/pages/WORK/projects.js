@@ -52,8 +52,8 @@ export const PROJECTS = [
     ],
   },
   {
-    id: 'serviceontario-integration',
-    label: '03 // ServiceOntario Integration',
+    id: 'regi-internal-tool',
+    label: '03 // REGi Internal Tool',
     description: 'An AI tool helping policy advisors write clearer regulation',
     previewColor: '#d8cbe0',
   },
@@ -64,8 +64,8 @@ export const PROJECTS = [
     previewColor: '#cfe0d3',
   },
   {
-    id: 'ophelia-ai-interface',
-    label: '05 // Ophelia AI Interface',
+    id: 'ophelia-ai-canvas',
+    label: '05 // Ophelia - AI Canvas',
     description: 'An infinite AI canvas for directing image and video generation',
     previewColor: '#e8d4c9',
   },
