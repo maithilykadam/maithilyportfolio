@@ -14,6 +14,17 @@ export const CONTACT_OPTIONS = [
 // so each option is actually legible sitting over a photo or video instead
 // of relying on the parent's hover state alone to make the whole area
 // readable.
+//
+// No negative margin canceling the padding here (unlike the single Contact
+// pill below, where that trick keeps a lone element's resting position from
+// shifting). These rows only exist in the DOM while the menu is open, so
+// there's no resting-layout position to preserve — and canceling the
+// padding was exactly what made Email's and LinkedIn's pills overlap: the
+// padding stopped counting toward each row's height, so the flex column's
+// `gap` was measuring space between two much-smaller invisible boxes while
+// the actual painted pills (padding included) bled past them and into each
+// other. Letting the padding count as real height means the pills are
+// simply, reliably stacked with real space between them.
 function ContactOption({ label, href, external, needsFill }) {
   const [hovered, setHovered] = useState(false)
   return (
@@ -49,7 +60,6 @@ function ContactOption({ label, href, external, needsFill }) {
         style={{
           display: 'inline-block',
           padding: `${rpx(8)} ${rpx(14)}`,
-          margin: `${rpx(-8)} ${rpx(-14)}`,
           borderRadius: '999px',
         }}
       >
@@ -93,7 +103,11 @@ export default function ContactLink({ active }) {
     >
       <AnimatePresence>
         {hovered && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: rpx(10) }}>
+          // No extra gap between rows — each pill's own padding (see the
+          // comment on ContactOption above) already gives Email and
+          // LinkedIn rpx(16) of combined breathing room, which reads as
+          // plenty on its own without a visible seam between the two.
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             {CONTACT_OPTIONS.map((option) => (
               <ContactOption key={option.label} {...option} needsFill={needsFill} />
             ))}
@@ -139,13 +153,11 @@ export default function ContactLink({ active }) {
           }}
         >
           <span>Contact</span>
-          <motion.span
-            animate={{ y: hovered ? -3 : 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            style={{ display: 'inline-block', fontSize: rpx(19) }}
-          >
-            ↑
-          </motion.span>
+          {/* Static now — no y translate, no scale. The pill itself
+              already scales up on hover (see the parent motion.span
+              above), which was enough movement on its own; animating the
+              arrow too on top of that just looked busy. */}
+          <span style={{ display: 'inline-block', fontSize: rpx(19) }}>↑</span>
         </motion.span>
       </motion.div>
     </div>

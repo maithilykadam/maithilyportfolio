@@ -78,15 +78,17 @@ export default function ResumeLink({ active }) {
           border: '1px solid rgba(0, 0, 0, 0.12)',
         }}
       >
-        {/* Text + arrow scale up together as one group on hover, rather
-            than just the arrow nudging on its own — reads as the whole
-            link "growing" slightly instead of the arrow darting off. */}
-        <motion.span
-          animate={{ scale: hovered ? 1.08 : 1 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: rpx(6), transformOrigin: 'left center' }}
-        >
-          <span>Resume</span>
+        {/* Only "Resume" itself scales up on hover now — the arrow stays
+            static (same call as the Contact pill's arrow: no motion of its
+            own, just along for the ride visually as part of the pill). */}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: rpx(6) }}>
+          <motion.span
+            animate={{ scale: hovered ? 1.08 : 1 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            style={{ display: 'inline-block', transformOrigin: 'left center' }}
+          >
+            Resume
+          </motion.span>
           {/* Custom arrow instead of the ↗ glyph — short, thin stem with a
               chunkier, larger arrowhead corner (two thicker strokes) rather
               than the default character's thin, overlong tail. */}
@@ -100,7 +102,7 @@ export default function ResumeLink({ active }) {
               strokeLinejoin="round"
             />
           </svg>
-        </motion.span>
+        </span>
       </motion.span>
     </motion.a>
   )
